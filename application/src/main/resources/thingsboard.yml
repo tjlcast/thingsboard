@@ -108,7 +108,7 @@ coap:
   timeout: "${COAP_TIMEOUT:10000}"
 
 database:
-  type: "${DATABASE_TYPE:sql}" # cassandra OR sql
+  type: "${DATABASE_TYPE:cassandra}" # cassandra OR sql
 
 # Cassandra driver configuration parameters
 cassandra:
@@ -229,20 +229,20 @@ spring.mvc.cors:
          allow-credentials: "true"
 
 # HSQLDB DAO Configuration
-spring:
-  data:
-    jpa:
-      repositories:
-        enabled: "true"
-  jpa:
-    hibernate:
-      ddl-auto: "validate"
-    database-platform: "${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.HSQLDialect}"
-  datasource:
-    driverClassName: "${SPRING_DRIVER_CLASS_NAME:org.hsqldb.jdbc.JDBCDriver}"
-    url: "${SPRING_DATASOURCE_URL:jdbc:hsqldb:file:${SQL_DATA_FOLDER:/tmp}/thingsboardDb;sql.enforce_size=false}"
-    username: "${SPRING_DATASOURCE_USERNAME:sa}"
-    password: "${SPRING_DATASOURCE_PASSWORD:}"
+#spring:
+# data:
+#    jpa:
+#      repositories:
+#        enabled: "true"
+#  jpa:
+#    hibernate:
+#      ddl-auto: "validate"
+#    database-platform: "${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.HSQLDialect}"
+#  datasource:
+#    driverClassName: "${SPRING_DRIVER_CLASS_NAME:org.hsqldb.jdbc.JDBCDriver}"
+#    url: "${SPRING_DATASOURCE_URL:jdbc:hsqldb:file:${SQL_DATA_FOLDER:/tmp}/thingsboardDb;sql.enforce_size=false}"
+#    username: "${SPRING_DATASOURCE_USERNAME:sa}"
+#    password: "${SPRING_DATASOURCE_PASSWORD:}"
 
 
 # PostgreSQL DAO Configuration
