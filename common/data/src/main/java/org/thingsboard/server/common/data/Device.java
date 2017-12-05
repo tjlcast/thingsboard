@@ -31,6 +31,9 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
     private CustomerId customerId;
     private String name;
     private String type;
+    private String manufacture;
+    private String model;
+    private String parentDeviceId;
     private transient JsonNode additionalInfo;
 
     public Device() {
@@ -90,6 +93,31 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
     public void setAdditionalInfo(JsonNode additionalInfo) {
         this.additionalInfo = additionalInfo;
     }
+
+
+    public String getManufacture() {
+        return manufacture;
+    }
+
+    public void setManufacture(String manufacture) {
+        this.manufacture = manufacture;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getParentDeviceId() {
+        return parentDeviceId;
+    }
+
+    public void setParentDeviceId(String parentDeviceId) {
+        this.parentDeviceId = parentDeviceId;
+    }
     
     @Override
     public String getSearchText() {
@@ -98,23 +126,16 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Device [tenantId=");
-        builder.append(tenantId);
-        builder.append(", customerId=");
-        builder.append(customerId);
-        builder.append(", name=");
-        builder.append(name);
-        builder.append(", type=");
-        builder.append(type);
-        builder.append(", additionalInfo=");
-        builder.append(additionalInfo);
-        builder.append(", createdTime=");
-        builder.append(createdTime);
-        builder.append(", id=");
-        builder.append(id);
-        builder.append("]");
-        return builder.toString();
+        return "Device{" +
+                "id=" + id +
+                ", tenantId=" + tenantId +
+                ", customerId=" + customerId +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                ", manufacture='" + manufacture + '\'' +
+                ", model='" + model + '\'' +
+                ", parentDeviceId='" + parentDeviceId + '\'' +
+                ", additionalInfo=" + additionalInfo +
+                '}';
     }
-
 }

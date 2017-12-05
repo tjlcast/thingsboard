@@ -59,6 +59,15 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
 
     @Column(name = SEARCH_TEXT_PROPERTY)
     private String searchText;
+
+    @Column(name  = DEVICE_PARENT_DEVICE_ID_PROPERTY )
+    private String parentDeviceId;
+
+    @Column(name = DEVICE_MANUFACTURE_PROPERTY )
+    private String manufacture;//厂商
+
+    @Column(name  = DEVICE_MODEL_PROPERTY )
+    private String model;//设备型号
     
     @Column(name = DEVICE_ADDITIONAL_INFO_PROPERTY, codec = JsonCodec.class)
     private JsonNode additionalInfo;
@@ -80,6 +89,9 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         this.name = device.getName();
         this.type = device.getType();
         this.additionalInfo = device.getAdditionalInfo();
+        this.model = "device.getModel()";         //test
+        this.manufacture = "device.getManufacture()";
+        this.parentDeviceId = "device.getParentDeviceId()";
     }
     
     public UUID getId() {
@@ -122,6 +134,30 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         this.type = type;
     }
 
+    public String getParentDeviceId() {
+        return parentDeviceId;
+    }
+
+    public void setParentDeviceId(String parentDeviceId) {
+        this.parentDeviceId = parentDeviceId;
+    }
+
+    public String getManufacture() {
+        return manufacture;
+    }
+
+    public void setManufacture(String manufacture) {
+        this.manufacture = manufacture;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
     public JsonNode getAdditionalInfo() {
         return additionalInfo;
     }
@@ -157,6 +193,9 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         device.setName(name);
         device.setType(type);
         device.setAdditionalInfo(additionalInfo);
+        device.setManufacture(manufacture);
+        device.setModel(model);
+        device.setParentDeviceId(parentDeviceId);
         return device;
     }
 
