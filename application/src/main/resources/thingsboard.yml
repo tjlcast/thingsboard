@@ -230,7 +230,7 @@ spring.mvc.cors:
 
 # HSQLDB DAO Configuration
 #spring:
-# data:
+#  data:
 #    jpa:
 #      repositories:
 #        enabled: "true"

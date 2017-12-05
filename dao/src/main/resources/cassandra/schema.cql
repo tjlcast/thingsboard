@@ -158,6 +158,9 @@ CREATE TABLE IF NOT EXISTS thingsboard.device (
     name text,
     type text,
     search_text text,
+    manufacture text,
+    model text,
+    parent_device_id text,
     additional_info text,
     PRIMARY KEY (id, tenant_id, customer_id, type)
 );

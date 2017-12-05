@@ -125,6 +125,9 @@ public class ModelConstants {
     public static final String DEVICE_CUSTOMER_ID_PROPERTY = CUSTOMER_ID_PROPERTY;
     public static final String DEVICE_NAME_PROPERTY = "name";
     public static final String DEVICE_TYPE_PROPERTY = "type";
+    public static final String DEVICE_PARENT_DEVICE_ID_PROPERTY = "parent_device_id";
+    public static final String DEVICE_MANUFACTURE_PROPERTY = "manufacture";
+    public static final String DEVICE_MODEL_PROPERTY = "model";
     public static final String DEVICE_ADDITIONAL_INFO_PROPERTY = ADDITIONAL_INFO_PROPERTY;
 
     public static final String DEVICE_BY_TENANT_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "device_by_tenant_and_search_text";
