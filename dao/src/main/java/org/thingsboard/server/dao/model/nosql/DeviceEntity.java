@@ -63,6 +63,9 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
     @Column(name  = DEVICE_PARENT_DEVICE_ID_PROPERTY )
     private String parentDeviceId;
 
+    @Column(name  = DEVICE_DEVICE_TYPE_PROPERTY)
+    private String deviceType; //设备
+
     @Column(name = DEVICE_MANUFACTURE_PROPERTY )
     private String manufacture;//厂商
 
@@ -92,6 +95,7 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         this.model = "device.getModel()";         //test
         this.manufacture = "device.getManufacture()";
         this.parentDeviceId = "device.getParentDeviceId()";
+        this.deviceType = "device.getDeviceType()";
     }
     
     public UUID getId() {
@@ -150,6 +154,14 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         this.manufacture = manufacture;
     }
 
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
+
     public String getModel() {
         return model;
     }
@@ -196,6 +208,7 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         device.setManufacture(manufacture);
         device.setModel(model);
         device.setParentDeviceId(parentDeviceId);
+        device.setDeviceType(deviceType);
         return device;
     }
 
