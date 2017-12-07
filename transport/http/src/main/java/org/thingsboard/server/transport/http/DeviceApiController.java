@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.security.DeviceTokenCredentials;
 import org.thingsboard.server.common.msg.core.*;
 import org.thingsboard.server.common.msg.session.AdaptorToSessionActorMsg;
@@ -35,7 +36,9 @@ import org.thingsboard.server.common.msg.session.FromDeviceMsg;
 import org.thingsboard.server.common.transport.SessionMsgProcessor;
 import org.thingsboard.server.common.transport.adaptor.JsonConverter;
 import org.thingsboard.server.common.transport.auth.DeviceAuthService;
+import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.transport.http.session.HttpSessionCtx;
+import org.thingsboard.server.transport.http.utils.StringUtil;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,6 +61,9 @@ public class DeviceApiController {
 
     @Autowired(required = false)
     private DeviceAuthService authService;
+
+    @Autowired(required = false)
+    private DeviceService deviceService;
 
     @RequestMapping(value = "/{deviceToken}/attributes", method = RequestMethod.GET, produces = "application/json")
     public DeferredResult<ResponseEntity> getDeviceAttributes(@PathVariable("deviceToken") String deviceToken,
@@ -165,6 +171,33 @@ public class DeviceApiController {
     public DeferredResult<ResponseEntity> subscribeToAttributes(@PathVariable("deviceToken") String deviceToken,
                                                                 @RequestParam(value = "timeout", required = false, defaultValue = "0") long timeout) {
         return subscribe(deviceToken, timeout, new AttributesSubscribeMsg());
+    }
+
+    @RequestMapping(value = "/{deviceToken}/attributes/register", method = RequestMethod.GET, produces = "application/json")
+    public DeferredResult<ResponseEntity> register(@PathVariable("deviceToken") String deviceToken,
+                                                   @RequestBody String json) {
+        DeferredResult<ResponseEntity> responseWriter = new DeferredResult<ResponseEntity>();
+        HttpSessionCtx ctx = getHttpSessionCtx(responseWriter);
+
+        JsonObject info = new JsonParser().parse(json).getAsJsonObject();
+        String manufacture = info.has("manufacture")?info.get("manufacture").getAsString():null;
+        String deviceType = info.has("deviceType")?info.get("deviceType").getAsString():null;
+        String model = info.has("model")?info.get("model").getAsString():null;
+        if(!StringUtil.checkNotNull(manufacture,deviceType,model)){
+            responseWriter.setResult(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+            return responseWriter;
+        }
+        if(ctx.login(new DeviceTokenCredentials(deviceToken))){
+            Device device = ctx.getDevice();
+            device.setManufacture(manufacture);
+            device.setDeviceType(deviceType);
+            device.setModel(model);
+            deviceService.saveDevice(device);
+            responseWriter.setResult(new ResponseEntity<>(HttpStatus.OK));
+        }else{
+            responseWriter.setResult(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
+        }
+        return responseWriter;
     }
 
     private DeferredResult<ResponseEntity> subscribe(String deviceToken, long timeout, FromDeviceMsg msg) {
