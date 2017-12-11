@@ -45,6 +45,7 @@ import org.thingsboard.server.common.msg.aware.SessionAwareMsg;
 import org.thingsboard.server.common.msg.core.BasicGetAttributesResponse;
 import org.thingsboard.server.common.msg.core.BasicRequest;
 import org.thingsboard.server.common.msg.core.BasicStatusCodeResponse;
+import org.thingsboard.server.common.msg.device.DeviceRecognitionMsg;
 import org.thingsboard.server.common.msg.kv.BasicAttributeKVMsg;
 import org.thingsboard.server.common.msg.session.*;
 import org.thingsboard.server.common.transport.SessionMsgProcessor;
@@ -128,6 +129,9 @@ public class CoapServerTest {
                             e.printStackTrace();
                         }
                     }
+                }
+                public void onMsg(DeviceRecognitionMsg msg){
+
                 }
             };
         }

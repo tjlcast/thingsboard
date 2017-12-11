@@ -40,6 +40,7 @@ import org.thingsboard.server.common.msg.cluster.ClusterEventMsg;
 import org.thingsboard.server.common.msg.cluster.ServerAddress;
 import org.thingsboard.server.common.msg.cluster.ToAllNodesMsg;
 import org.thingsboard.server.common.msg.core.ToDeviceSessionActorMsg;
+import org.thingsboard.server.common.msg.device.DeviceRecognitionMsg;
 import org.thingsboard.server.extensions.api.device.DeviceNameOrTypeUpdateMsg;
 import org.thingsboard.server.common.msg.device.ToDeviceActorMsg;
 import org.thingsboard.server.common.msg.plugin.ComponentLifecycleMsg;
@@ -192,6 +193,13 @@ public class DefaultActorService implements ActorService {
     public void onMsg(RpcBroadcastMsg msg) {
         log.trace("Processing broadcast rpc msg: {}", msg);
         rpcManagerActor.tell(msg, ActorRef.noSender());
+    }
+
+    //TODO 不太合理
+    @Override
+    public void onMsg(DeviceRecognitionMsg msg) {
+        log.trace("Processing broadcast rpc msg: {}", msg);
+        appActor.tell(msg, ActorRef.noSender());
     }
 
     @Override

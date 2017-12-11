@@ -43,6 +43,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-transport-native-epoll</artifactId>
             <version>${netty.version}</version>
@@ -590,7 +594,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <finalName>${pkg.name}</finalName>
+                    <finalName>${pkg.name}</finalName>s
                     <descriptors>
                         <descriptor>src/main/assembly/windows.xml</descriptor>
                     </descriptors>

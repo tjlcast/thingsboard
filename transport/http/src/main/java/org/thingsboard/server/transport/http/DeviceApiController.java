@@ -29,6 +29,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.security.DeviceTokenCredentials;
 import org.thingsboard.server.common.msg.core.*;
+import org.thingsboard.server.common.msg.device.DeviceRecognitionMsg;
 import org.thingsboard.server.common.msg.session.AdaptorToSessionActorMsg;
 import org.thingsboard.server.common.msg.session.BasicAdaptorToSessionActorMsg;
 import org.thingsboard.server.common.msg.session.BasicToDeviceActorSessionMsg;
@@ -173,9 +174,10 @@ public class DeviceApiController {
         return subscribe(deviceToken, timeout, new AttributesSubscribeMsg());
     }
 
-    @RequestMapping(value = "/{deviceToken}/attributes/register", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{deviceToken}/attributes/register", method = RequestMethod.POST, produces = "application/json")
     public DeferredResult<ResponseEntity> register(@PathVariable("deviceToken") String deviceToken,
                                                    @RequestBody String json) {
+        System.err.println(json);
         DeferredResult<ResponseEntity> responseWriter = new DeferredResult<ResponseEntity>();
         HttpSessionCtx ctx = getHttpSessionCtx(responseWriter);
 
@@ -197,6 +199,8 @@ public class DeviceApiController {
         }else{
             responseWriter.setResult(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
         }
+        DeviceRecognitionMsg msg = new DeviceRecognitionMsg(manufacture,deviceType,model,ctx.getDevice());
+        processor.onMsg(msg);
         return responseWriter;
     }
 
