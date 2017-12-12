@@ -18,6 +18,9 @@ package org.thingsboard.server.actors.device;
 import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import akka.event.LoggingAdapter;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.thingsboard.server.actors.ActorSystemContext;
 import org.thingsboard.server.actors.rule.*;
 import org.thingsboard.server.actors.shared.AbstractContextAwareMsgProcessor;
@@ -28,9 +31,11 @@ import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.SessionId;
 import org.thingsboard.server.common.data.kv.AttributeKey;
 import org.thingsboard.server.common.data.kv.AttributeKvEntry;
+import org.thingsboard.server.common.data.kv.KvEntry;
 import org.thingsboard.server.common.msg.cluster.ClusterEventMsg;
 import org.thingsboard.server.common.msg.cluster.ServerAddress;
 import org.thingsboard.server.common.msg.core.*;
+import org.thingsboard.server.common.msg.device.DeviceRecognitionMsg;
 import org.thingsboard.server.common.msg.device.ToDeviceActorMsg;
 import org.thingsboard.server.common.msg.kv.BasicAttributeKVMsg;
 import org.thingsboard.server.common.msg.session.FromDeviceMsg;
@@ -46,9 +51,13 @@ import org.thingsboard.server.extensions.api.plugins.msg.ToDeviceRpcRequest;
 import org.thingsboard.server.extensions.api.plugins.msg.ToDeviceRpcRequestBody;
 import org.thingsboard.server.extensions.api.plugins.msg.ToDeviceRpcRequestPluginMsg;
 import org.thingsboard.server.extensions.api.plugins.msg.ToPluginRpcResponseDeviceMsg;
+import org.thingsboard.server.transport.http.utils.StringUtil;
+import org.thingsboard.server.utils.HttpUtil;
+import scala.concurrent.duration.Duration;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -66,6 +75,8 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
 
     private final Map<Integer, ToDeviceRpcRequestMetadata> rpcPendingMap;
 
+    private JsonObject deviceShadow;
+
     private int rpcSeq = 0;
     private String deviceName;
     private String deviceType;
@@ -79,6 +90,16 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         this.rpcSubscriptions = new HashMap<>();
         this.rpcPendingMap = new HashMap<>();
         initAttributes();
+
+        //TODO 初始化设备影子并开启心跳
+        initDeviceShadow();
+        systemContext.getScheduler().schedule(Duration.create(2000, TimeUnit.MILLISECONDS),
+                Duration.create(2000, TimeUnit.MILLISECONDS), new Runnable() {
+                    @Override
+                    public void run() {
+                        //TODO 发送心跳
+                    }
+                },systemContext.getActorSystem().dispatcher());
     }
 
     private void initAttributes() {
@@ -90,6 +111,18 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
                 fetchAttributes(DataConstants.SERVER_SCOPE), fetchAttributes(DataConstants.SHARED_SCOPE));
     }
 
+    private void initDeviceShadow(){
+        Device device = systemContext.getDeviceService().findDeviceById(deviceId);
+        String manufacture = device.getManufacture();
+        String deviceType = device.getDeviceType();
+        String model = device.getModel();
+        if(StringUtil.checkNotNull(manufacture,deviceType,model)){
+            deviceShadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
+            deviceShadow.addProperty("deviceId",device.getId().toString());
+            //TODO send to service midware
+        }
+    };
+
     private void refreshAttributes(DeviceAttributesEventNotificationMsg msg) {
         if (msg.isDeleted()) {
             msg.getDeletedKeys().forEach(key -> deviceAttributes.remove(key));
@@ -99,6 +132,8 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
     }
 
     void processRpcRequest(ActorContext context, ToDeviceRpcRequestPluginMsg msg) {
+        //TODO 根据 设备影子类型来决定如何发送RPC请求
+
         ToDeviceRpcRequest request = msg.getMsg();
         ToDeviceRpcRequestBody body = request.getBody();
         ToDeviceRpcRequestMsg rpcRequest = new ToDeviceRpcRequestMsg(
@@ -241,6 +276,21 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         } else {
             context.self().tell(new RulesProcessedMsg(ctx), context.self());
         }
+        //TODO 如果上传的数据是属性或者遥测，将更新放到设备影子中去
+        if(srcMsg.getToDeviceActorMsg().getPayload().getMsgType().equals(MsgType.POST_ATTRIBUTES_REQUEST)){
+            Set<AttributeKvEntry> set =  ((BasicUpdateAttributesRequest)srcMsg.getToDeviceActorMsg().getPayload()).getAttributes();
+            for(AttributeKvEntry kv:set){
+                deviceShadow.addProperty(kv.getKey(),kv.getValueAsString());
+            }
+        }else if(srcMsg.getToDeviceActorMsg().getPayload().getMsgType().equals(MsgType.POST_TELEMETRY_REQUEST)){
+            Map<Long, List<KvEntry>> map =  ((BasicTelemetryUploadRequest)srcMsg.getToDeviceActorMsg().getPayload()).getData();
+            for(Map.Entry<Long, List<KvEntry>> kv:map.entrySet()){
+                for(KvEntry entry:kv.getValue()){
+                    deviceShadow.addProperty(entry.getKey(),entry.getValueAsString());
+                }
+            }
+        }
+   //     srcMsg.getToDeviceActorMsg().
     }
 
     void processRpcResponses(ActorContext context, ToDeviceActorMsg msg) {
@@ -380,5 +430,18 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
     public void processNameOrTypeUpdate(DeviceNameOrTypeUpdateMsg msg) {
         this.deviceName = msg.getDeviceName();
         this.deviceType = msg.getDeviceType();
+    }
+
+    public void process(DeviceRecognitionMsg msg){
+        //TODO modefied by cc
+        Device device = systemContext.getDeviceService().findDeviceById(deviceId);
+        String manufacture = msg.getManufacture();
+        String deviceType = msg.getDeviceType();
+        String model = msg.getModel();
+        if(StringUtil.checkNotNull(manufacture,deviceType,model)){
+            deviceShadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
+            deviceShadow.addProperty("deviceId",device.getId().toString());
+            //TODO send to service midware
+        }
     }
 }

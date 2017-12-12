@@ -17,6 +17,7 @@ package org.thingsboard.server.actors.device;
 
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import com.google.gson.JsonObject;
 import org.thingsboard.server.actors.ActorSystemContext;
 import org.thingsboard.server.actors.rule.RulesProcessedMsg;
 import org.thingsboard.server.actors.service.ContextAwareActor;
@@ -25,6 +26,7 @@ import org.thingsboard.server.actors.tenant.RuleChainDeviceMsg;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.msg.cluster.ClusterEventMsg;
+import org.thingsboard.server.common.msg.device.DeviceRecognitionMsg;
 import org.thingsboard.server.common.msg.device.ToDeviceActorMsg;
 import org.thingsboard.server.extensions.api.device.DeviceAttributesEventNotificationMsg;
 import org.thingsboard.server.extensions.api.device.DeviceCredentialsUpdateNotificationMsg;
@@ -39,6 +41,7 @@ public class DeviceActor extends ContextAwareActor {
     private final TenantId tenantId;
     private final DeviceId deviceId;
     private final DeviceActorMessageProcessor processor;
+  //  private final JsonObject deviceShadow;
 
     private DeviceActor(ActorSystemContext systemContext, TenantId tenantId, DeviceId deviceId) {
         super(systemContext);
@@ -69,7 +72,9 @@ public class DeviceActor extends ContextAwareActor {
             processor.processTimeout(context(), (TimeoutMsg) msg);
         } else if (msg instanceof ClusterEventMsg) {
             processor.processClusterEventMsg((ClusterEventMsg) msg);
-        } else {
+        } else if(msg instanceof DeviceRecognitionMsg){
+            processor.process((DeviceRecognitionMsg)msg);
+        }else {
             logger.debug("[{}][{}] Unknown msg type.", tenantId, deviceId, msg.getClass().getName());
         }
     }
