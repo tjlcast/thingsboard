@@ -18,11 +18,10 @@ package org.thingsboard.server.common.data;
 import lombok.EqualsAndHashCode;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.GroupId;
 import org.thingsboard.server.common.data.id.TenantId;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
-import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 public class Device extends SearchTextBased<DeviceId> implements HasName {
@@ -31,7 +30,7 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
 
     private TenantId tenantId;
     private CustomerId customerId;
-    private UUID groupId;
+    private GroupId groupId;
     private String name;
     private String type;
     private String manufacture;//厂商
@@ -88,11 +87,11 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
     }
 
 
-    public UUID getGroupId() {
+    public GroupId getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(UUID groupId) {
+    public void setGroupId(GroupId groupId) {
         this.groupId = groupId;
     }
 

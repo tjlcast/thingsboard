@@ -36,5 +36,5 @@ public interface GroupDao  extends Dao<Group> {
      * @param pageLink the page link
      * @return the list of group object
      */
-    //List<Group> findGroupsByCustomerId(UUID customerId, TextPageLink pageLink);
+    List<Group> findGroupsByCustomerId(UUID customerId, TextPageLink pageLink) ;
 }

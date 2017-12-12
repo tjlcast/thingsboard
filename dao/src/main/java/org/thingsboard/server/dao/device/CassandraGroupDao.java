@@ -44,4 +44,13 @@ public class CassandraGroupDao extends CassandraAbstractSearchTextDao<GroupEntit
         return DaoUtil.convertDataList(groupEntities);
     }
 
+    @Override
+    public List<Group> findGroupsByCustomerId(UUID customerId, TextPageLink pageLink) {
+        log.debug("Try to find groups by customerId [{}] and pageLink [{}]",  customerId , pageLink);
+        List<GroupEntity> groupEntities = findPageWithTextSearch(ModelConstants.GROUP_BY_CUSTOMER_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME,
+                Arrays.asList(eq(ModelConstants.GROUP_CUSTOMER_ID_PROPERTY, customerId)), pageLink);
+        log.trace("Found groups [{}] by customerId [{}] and pageLink [{}]", groupEntities, customerId,  pageLink);
+        return DaoUtil.convertDataList(groupEntities);
+    }
+
 }

@@ -56,6 +56,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     public static final String INCORRECT_PAGE_LINK = "Incorrect page link ";
     public static final String INCORRECT_CUSTOMER_ID = "Incorrect customerId ";
     public static final String INCORRECT_DEVICE_ID = "Incorrect deviceId ";
+    public static final String INCORRECT_GROUP_ID = "Incorrect groupId ";
     @Autowired
     private DeviceDao deviceDao;
 
@@ -66,10 +67,25 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     private CustomerDao customerDao;
 
     @Autowired
-    private GroupDao groupDao;
-
-    @Autowired
     private DeviceCredentialsService deviceCredentialsService;
+
+    //*********查找组中设备**********
+    @Override
+    public TextPageData<Device> findDevicesByGroupId(GroupId groupId, TextPageLink pageLink) {
+        log.trace("Executing findDevicesByGroupId, groupId [{}], pageLink [{}]", groupId, pageLink);
+        validateId(groupId, INCORRECT_GROUP_ID + groupId);
+        validatePageLink(pageLink, INCORRECT_PAGE_LINK + pageLink);
+        List<Device> devices = deviceDao.findDevicesByGroupId(groupId.getId(), pageLink);
+        return new TextPageData<>(devices, pageLink);
+    }
+
+    //******分配相应设备到对应的设备组******
+    @Override
+    public Device assignDeviceToGroup(DeviceId deviceId, GroupId groupId) {
+        Device device = findDeviceById(deviceId);
+        device.setGroupId(groupId);
+        return saveDevice(device);
+    }
 
     @Override
     public Device findDeviceById(DeviceId deviceId) {
@@ -101,7 +117,6 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     public Device saveDevice(Device device) {
         log.trace("Executing saveDevice [{}]", device);
         deviceValidator.validate(device);
-        //device.setGroupId(new GroupId(device.getCustomerId().getId()));
         Device savedDevice = deviceDao.save(device);
         if (device.getId() == null) {
             DeviceCredentials deviceCredentials = new DeviceCredentials();
@@ -110,34 +125,8 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
             deviceCredentials.setCredentialsId(RandomStringUtils.randomAlphanumeric(20));
             deviceCredentialsService.createDeviceCredentials(deviceCredentials);
         }
-        Group group = new Group(new GroupId(savedDevice.getUuidId()));
-        group.setTenantId(savedDevice.getTenantId());
-        group.setCustomerId(new CustomerId(savedDevice.getUuidId()));
-        group.setName("test group");
-        groupDao.save(group);
-        TextPageLink textPageLink = new TextPageLink(10);
-        List<Group> groups = groupDao.findGroupsByTenantId(savedDevice.getTenantId().getId(),textPageLink);
-        log.trace("Executing findGroupsByTenantId [{}]", groups);
-        //TextPageData<Device> devices = findDevicesByGroupId(new GroupId(savedDevice.getUuidId()),textPageLink);
-        List<Device> devices = deviceDao.findDevicesByTenantIdAndGroupId(savedDevice.getTenantId().getId(),savedDevice.getCustomerId().getId(),savedDevice.getUuidId(), textPageLink);
-        log.trace("Executing findDevicesByGroupId [{}]", devices);
         return savedDevice;
     }
-
-    @Override
-    public Device assignDeviceToGroup(DeviceId deviceId, UUID groupId) {
-        Device device = findDeviceById(deviceId);
-        device.setGroupId(groupId);
-        return saveDevice(device);
-    }
-
-    /*public TextPageData<Device> findDevicesByGroupId(TenantId tenantId, TextPageLink pageLink) {
-        log.trace("Executing findDevicesByTenantId, tenantId [{}], pageLink [{}]", tenantId, pageLink);
-        validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
-        validatePageLink(pageLink, INCORRECT_PAGE_LINK + pageLink);
-        List<Device> devices = deviceDao.findDevicesByTenantId(tenantId.getId(), pageLink);
-        return new TextPageData<>(devices, pageLink);
-    }*/
 
     @Override
     public Device assignDeviceToCustomer(DeviceId deviceId, CustomerId customerId) {
@@ -163,15 +152,6 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         }
         deleteEntityRelations(deviceId);
         deviceDao.removeById(deviceId.getId());
-    }
-
-    @Override
-    public TextPageData<Device> findDevicesByTenantIdAndGroupId(TenantId tenantId ,CustomerId customerId, GroupId groupId, TextPageLink pageLink) {
-        log.trace("Executing findDevicesByGroupId, tenantId [{}], pageLink [{}]", groupId, pageLink);
-        validateId(groupId, INCORRECT_TENANT_ID + groupId);
-        validatePageLink(pageLink, INCORRECT_PAGE_LINK + pageLink);
-        List<Device> devices = deviceDao.findDevicesByTenantIdAndGroupId(tenantId.getId(),customerId.getId(),groupId.getId(), pageLink);
-        return new TextPageData<>(devices, pageLink);
     }
 
     @Override

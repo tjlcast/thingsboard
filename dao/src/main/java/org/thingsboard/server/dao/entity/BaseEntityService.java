@@ -110,9 +110,6 @@ public class BaseEntityService extends AbstractEntityService implements EntitySe
             case ALARM:
                 hasName = alarmService.findAlarmByIdAsync(new AlarmId(entityId.getId()));
                 break;
-            case GROUP:
-                hasName = groupService.findGroupByIdAsync(new GroupId(entityId.getId()));
-                break;
             default:
                 throw new IllegalStateException("Not Implemented!");
         }
