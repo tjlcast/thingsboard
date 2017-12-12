@@ -155,6 +155,7 @@ CREATE TABLE IF NOT EXISTS thingsboard.device (
     id timeuuid,
     tenant_id timeuuid,
     customer_id timeuuid,
+    group_id timeuuid,
     name text,
     type text,
     search_text text,
@@ -163,42 +164,49 @@ CREATE TABLE IF NOT EXISTS thingsboard.device (
     device_type text,
     parent_device_id text,
     additional_info text,
-    PRIMARY KEY (id, tenant_id, customer_id, type)
+    PRIMARY KEY (id, tenant_id, customer_id, group_id, type)
 );
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.device_by_tenant_and_name AS
     SELECT *
     from thingsboard.device
-    WHERE tenant_id IS NOT NULL AND customer_id IS NOT NULL AND type IS NOT NULL AND name IS NOT NULL AND id IS NOT NULL
-    PRIMARY KEY ( tenant_id, name, id, customer_id, type)
+    WHERE tenant_id IS NOT NULL AND customer_id IS NOT NULL AND type IS NOT NULL AND name IS NOT NULL AND id IS NOT NULL AND group_id IS NOT NULL
+    PRIMARY KEY ( tenant_id, name, id, customer_id, group_id,type)
     WITH CLUSTERING ORDER BY ( name ASC, id DESC, customer_id DESC);
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.device_by_group_and_search_text AS
+    SELECT *
+    from thingsboard.device
+    WHERE tenant_id IS NOT NULL AND customer_id IS NOT NULL AND type IS NOT NULL AND search_text IS NOT NULL AND id IS NOT NULL AND group_id IS NOT NULL
+    PRIMARY KEY ( tenant_id, search_text, id, customer_id, group_id, type)
+    WITH CLUSTERING ORDER BY ( search_text ASC, group_id ASC ,id DESC, customer_id DESC);
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.device_by_tenant_and_search_text AS
     SELECT *
     from thingsboard.device
-    WHERE tenant_id IS NOT NULL AND customer_id IS NOT NULL AND type IS NOT NULL AND search_text IS NOT NULL AND id IS NOT NULL
-    PRIMARY KEY ( tenant_id, search_text, id, customer_id, type)
+    WHERE tenant_id IS NOT NULL AND customer_id IS NOT NULL AND type IS NOT NULL AND search_text IS NOT NULL AND id IS NOT NULL AND group_id IS NOT NULL
+    PRIMARY KEY ( tenant_id, search_text, id, customer_id, group_id,type)
     WITH CLUSTERING ORDER BY ( search_text ASC, id DESC, customer_id DESC);
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.device_by_tenant_by_type_and_search_text AS
     SELECT *
     from thingsboard.device
-    WHERE tenant_id IS NOT NULL AND customer_id IS NOT NULL AND type IS NOT NULL AND search_text IS NOT NULL AND id IS NOT NULL
-    PRIMARY KEY ( tenant_id, type, search_text, id, customer_id)
+    WHERE tenant_id IS NOT NULL AND customer_id IS NOT NULL AND type IS NOT NULL AND search_text IS NOT NULL AND id IS NOT NULL AND group_id IS NOT NULL
+    PRIMARY KEY ( tenant_id, type, search_text, id, group_id,customer_id)
     WITH CLUSTERING ORDER BY ( type ASC, search_text ASC, id DESC, customer_id DESC);
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.device_by_customer_and_search_text AS
     SELECT *
     from thingsboard.device
-    WHERE tenant_id IS NOT NULL AND customer_id IS NOT NULL AND type IS NOT NULL AND search_text IS NOT NULL AND id IS NOT NULL
-    PRIMARY KEY ( customer_id, tenant_id, search_text, id, type )
+    WHERE tenant_id IS NOT NULL AND customer_id IS NOT NULL AND type IS NOT NULL AND search_text IS NOT NULL AND id IS NOT NULL AND group_id IS NOT NULL
+    PRIMARY KEY ( customer_id, tenant_id, search_text, id, group_id,type )
     WITH CLUSTERING ORDER BY ( tenant_id DESC, search_text ASC, id DESC );
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.device_by_customer_by_type_and_search_text AS
     SELECT *
     from thingsboard.device
-    WHERE tenant_id IS NOT NULL AND customer_id IS NOT NULL AND type IS NOT NULL AND search_text IS NOT NULL AND id IS NOT NULL
-    PRIMARY KEY ( customer_id, tenant_id, type, search_text, id )
+    WHERE tenant_id IS NOT NULL AND customer_id IS NOT NULL AND type IS NOT NULL AND search_text IS NOT NULL AND id IS NOT NULL AND group_id IS NOT NULL
+    PRIMARY KEY ( customer_id, tenant_id, type, search_text, group_id,id )
     WITH CLUSTERING ORDER BY ( tenant_id DESC, type ASC, search_text ASC, id DESC );
 
 CREATE TABLE IF NOT EXISTS thingsboard.device_credentials (
@@ -220,6 +228,22 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.device_credentials_by_credent
 	from thingsboard.device_credentials
 	WHERE credentials_id IS NOT NULL AND id IS NOT NULL
 	PRIMARY KEY ( credentials_id, id );
+
+CREATE TABLE IF NOT EXISTS thingsboard.group (
+    id timeuuid,
+    tenant_id timeuuid,
+    customer_id timeuuid,
+    name text,
+    search_text text,
+    PRIMARY KEY (id, tenant_id, customer_id)
+);
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.group_by_tenant_and_search_text AS
+	SELECT *
+	from thingsboard.group
+	WHERE tenant_id IS NOT NULL AND search_text IS NOT NULL AND id IS NOT NULL AND customer_id IS NOT NULL
+	PRIMARY KEY ( tenant_id, search_text, id ,customer_id)
+	WITH CLUSTERING ORDER BY ( search_text ASC, id DESC );
 
 CREATE TABLE IF NOT EXISTS thingsboard.asset (
     id timeuuid,

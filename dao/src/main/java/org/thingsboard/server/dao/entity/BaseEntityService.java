@@ -29,6 +29,7 @@ import org.thingsboard.server.dao.asset.AssetService;
 import org.thingsboard.server.dao.customer.CustomerService;
 import org.thingsboard.server.dao.dashboard.DashboardService;
 import org.thingsboard.server.dao.device.DeviceService;
+import org.thingsboard.server.dao.device.GroupService;
 import org.thingsboard.server.dao.plugin.PluginService;
 import org.thingsboard.server.dao.rule.RuleService;
 import org.thingsboard.server.dao.tenant.TenantService;
@@ -68,6 +69,9 @@ public class BaseEntityService extends AbstractEntityService implements EntitySe
     @Autowired
     private AlarmService alarmService;
 
+    @Autowired
+    private GroupService groupService;
+
     @Override
     public void deleteEntityRelations(EntityId entityId) {
         super.deleteEntityRelations(entityId);
@@ -105,6 +109,9 @@ public class BaseEntityService extends AbstractEntityService implements EntitySe
                 break;
             case ALARM:
                 hasName = alarmService.findAlarmByIdAsync(new AlarmId(entityId.getId()));
+                break;
+            case GROUP:
+                hasName = groupService.findGroupByIdAsync(new GroupId(entityId.getId()));
                 break;
             default:
                 throw new IllegalStateException("Not Implemented!");

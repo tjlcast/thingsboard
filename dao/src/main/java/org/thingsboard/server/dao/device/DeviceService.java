@@ -21,12 +21,14 @@ import org.thingsboard.server.common.data.EntitySubtype;
 import org.thingsboard.server.common.data.device.DeviceSearchQuery;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.GroupId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.TextPageData;
 import org.thingsboard.server.common.data.page.TextPageLink;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface DeviceService {
     
@@ -38,11 +40,15 @@ public interface DeviceService {
 
     Device saveDevice(Device device);
 
+    Device assignDeviceToGroup(DeviceId deviceId, UUID groupId);
+
     Device assignDeviceToCustomer(DeviceId deviceId, CustomerId customerId);
 
     Device unassignDeviceFromCustomer(DeviceId deviceId);
 
     void deleteDevice(DeviceId deviceId);
+
+    TextPageData<Device> findDevicesByTenantIdAndGroupId(TenantId tenantId , CustomerId customerId,GroupId groupId, TextPageLink pageLink);
 
     TextPageData<Device> findDevicesByTenantId(TenantId tenantId, TextPageLink pageLink);
 

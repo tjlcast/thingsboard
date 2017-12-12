@@ -22,6 +22,8 @@ import org.thingsboard.server.common.data.id.TenantId;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.UUID;
+
 @EqualsAndHashCode(callSuper = true)
 public class Device extends SearchTextBased<DeviceId> implements HasName {
 
@@ -29,6 +31,7 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
 
     private TenantId tenantId;
     private CustomerId customerId;
+    private UUID groupId;
     private String name;
     private String type;
     private String manufacture;//厂商
@@ -49,6 +52,7 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
         super(device);
         this.tenantId = device.getTenantId();
         this.customerId = device.getCustomerId();
+        this.groupId = device.getGroupId();
         this.name = device.getName();
         this.type = device.getType();
         this.additionalInfo = device.getAdditionalInfo();
@@ -81,6 +85,15 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
 
     public void setCustomerId(CustomerId customerId) {
         this.customerId = customerId;
+    }
+
+
+    public UUID getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(UUID groupId) {
+        this.groupId = groupId;
     }
 
     @Override
@@ -142,6 +155,7 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
         return "Device{" +
                 "tenantId=" + tenantId +
                 ", customerId=" + customerId +
+                ", groupId=" + groupId +
                 ", name='" + name + '\'' +
                 ", type='" + type + '\'' +
                 ", manufacture='" + manufacture + '\'' +
@@ -151,5 +165,4 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
                 ", additionalInfo=" + additionalInfo +
                 '}';
     }
-
 }
