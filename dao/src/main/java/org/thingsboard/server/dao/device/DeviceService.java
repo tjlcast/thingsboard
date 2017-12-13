@@ -58,6 +58,8 @@ public interface DeviceService {
 
     void deleteDevicesByTenantId(TenantId tenantId);
 
+    void deleteDevicesByGroupId(GroupId groupId);
+
     TextPageData<Device> findDevicesByTenantIdAndCustomerId(TenantId tenantId, CustomerId customerId, TextPageLink pageLink);
 
     TextPageData<Device> findDevicesByTenantIdAndCustomerIdAndType(TenantId tenantId, CustomerId customerId, String type, TextPageLink pageLink);

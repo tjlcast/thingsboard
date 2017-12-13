@@ -246,6 +246,13 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.group_by_customer_and_search_
 	PRIMARY KEY ( customer_id, search_text, tenant_id, id )
 	WITH CLUSTERING ORDER BY ( customer_id ASC, id DESC );
 
+CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.group_by_customer_and_name AS
+    SELECT *
+    from thingsboard.group
+    WHERE customer_id IS NOT NULL AND name IS NOT NULL AND id IS NOT NULL AND tenant_id IS NOT NULL
+    PRIMARY KEY ( customer_id, name, tenant_id, id )
+    WITH CLUSTERING ORDER BY ( name ASC, id DESC, customer_id DESC);
+
 CREATE TABLE IF NOT EXISTS thingsboard.asset (
     id timeuuid,
     tenant_id timeuuid,

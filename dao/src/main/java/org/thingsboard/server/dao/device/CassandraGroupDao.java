@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.device;
 
+import com.datastax.driver.core.querybuilder.Select;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.Group;
@@ -12,9 +13,14 @@ import org.thingsboard.server.dao.util.NoSqlDao;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import static org.thingsboard.server.dao.model.ModelConstants.GROUP_BY_CUSTOMER_AND_NAME_COLUMN_FAMILY_NAME;
+import static org.thingsboard.server.dao.model.ModelConstants.GROUP_CUSTOMER_ID_PROPERTY;
+import static org.thingsboard.server.dao.model.ModelConstants.GROUP_NAME_PROPERTY;
 
 /**
  * Created by CZX on 2017/12/11.
@@ -51,6 +57,15 @@ public class CassandraGroupDao extends CassandraAbstractSearchTextDao<GroupEntit
                 Arrays.asList(eq(ModelConstants.GROUP_CUSTOMER_ID_PROPERTY, customerId)), pageLink);
         log.trace("Found groups [{}] by customerId [{}] and pageLink [{}]", groupEntities, customerId,  pageLink);
         return DaoUtil.convertDataList(groupEntities);
+    }
+
+    @Override
+    public Optional<Group> findGroupByCustomerIdAndName(UUID customerId, String name){
+        Select select = select().from(GROUP_BY_CUSTOMER_AND_NAME_COLUMN_FAMILY_NAME);
+        Select.Where query = select.where();
+        query.and(eq(GROUP_CUSTOMER_ID_PROPERTY, customerId));
+        query.and(eq(GROUP_NAME_PROPERTY, name));
+        return Optional.ofNullable(DaoUtil.getData(findOneByStatement(query)));
     }
 
 }

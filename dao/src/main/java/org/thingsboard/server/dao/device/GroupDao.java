@@ -37,4 +37,13 @@ public interface GroupDao  extends Dao<Group> {
      * @return the list of group object
      */
     List<Group> findGroupsByCustomerId(UUID customerId, TextPageLink pageLink) ;
+
+    /**
+     * Find group by customerId and name.
+     *
+     * @param customerId the customerId
+     * @param name the group name
+     * @return found group
+     */
+    Optional<Group> findGroupByCustomerIdAndName(UUID customerId, String name);
 }
