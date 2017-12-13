@@ -67,6 +67,9 @@ public class DeviceActor extends ContextAwareActor {
                 processor.processCredentialsUpdate();
             } else if (msg instanceof DeviceNameOrTypeUpdateMsg){
                 processor.processNameOrTypeUpdate((DeviceNameOrTypeUpdateMsg) msg);
+                //TODO modified by cc
+            }else if(msg instanceof  DeviceShadowMsg){
+                processor.processDeviceShadowMsg((DeviceShadowMsg)msg);
             }
         } else if (msg instanceof TimeoutMsg) {
             processor.processTimeout(context(), (TimeoutMsg) msg);
