@@ -27,7 +27,7 @@ public class ShadowController {
     protected DeviceService deviceService;
 
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/{deviceId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{deviceId}", method = RequestMethod.POST)
     public DeferredResult<String> shadow(@RequestBody String json,@PathVariable String deviceId){
         DeferredResult<String> result = new DeferredResult<>();
         JsonParser parser = new JsonParser();
