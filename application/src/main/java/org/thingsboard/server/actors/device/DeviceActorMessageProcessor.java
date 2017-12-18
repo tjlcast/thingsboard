@@ -492,11 +492,11 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         String protocol = service.getProtocol().toLowerCase();
         switch(protocol){
             case "http":
-                Response res = HttpUtil.sendPost(service.getUrl(),service.getServiceBody().getAsString());
+                Response res = HttpUtil.sendPost(service.getUrl(),service.getOtherInfo(),service.getServiceBody().getAsString());
                 msg.setResult(res.body().toString());
                 break;
             case "mqtt":
-                MqttUtil.sendMsg(service.getUrl(),service.getServiceBody().getAsString());
+                MqttUtil.sendMsg(service.getUrl(),service.getOtherInfo(),service.getServiceBody().getAsString());
                 msg.setResult("mqtt msg send out ok");
                 break;
             default:

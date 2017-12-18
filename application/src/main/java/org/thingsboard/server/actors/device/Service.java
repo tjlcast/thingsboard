@@ -21,7 +21,11 @@ public class Service {
     private String protocol;
 
     @Getter @Setter
+    private  JsonObject otherInfo;
+
+    @Getter @Setter
     private String url;
+
 
     @Getter @Setter
     private boolean requireResponce;
@@ -34,6 +38,7 @@ public class Service {
         serviceDescription = payLoad.get("serviceDescription").getAsString();
         serviceType = payLoad.get("serviceType").getAsString();
         protocol = payLoad.get("protocol").getAsString();
+        otherInfo = payLoad.get("otherInfo").getAsJsonObject();
         url = payLoad.get("url").getAsString();
         requireResponce = payLoad.get("requireResponce").getAsBoolean();
         serviceBody = payLoad.get("serviceBody").getAsJsonObject();

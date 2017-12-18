@@ -1,5 +1,6 @@
 package org.thingsboard.server.utils;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import okhttp3.*;
@@ -39,13 +40,18 @@ public class HttpUtil {
         return null;
     }
 
-    public static Response  sendPost(String url,String json){
+    public static Response  sendPost(String url,JsonObject headers,String json){
 
         RequestBody body = RequestBody.create(JSON, json);
-        Request request = new Request.Builder()
+        Request.Builder buider = new Request.Builder()
                 .url(url)
-                .post(body)
-                .build();
+                .post(body);
+
+        for(Map.Entry<String,JsonElement> entry:headers.entrySet()){
+            buider.header(entry.getKey(),entry.getValue().getAsString());
+        }
+
+        Request request = buider.build();
 
         try{
             Response response = httpClient.newCall(request).execute();
