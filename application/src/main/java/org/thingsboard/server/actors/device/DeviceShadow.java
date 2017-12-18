@@ -13,7 +13,7 @@ public class DeviceShadow {
 
     private HashMap<String,JsonObject> attributes;
     private HashMap<String,JsonObject> telemetries;
-    private HashMap<String,JsonObject> services;
+    private HashMap<String,Service> services;
 
     public DeviceShadow(){
         payload = new JsonObject();
@@ -40,9 +40,8 @@ public class DeviceShadow {
             telemetries.put(((JsonObject)json).get("telemetryName").getAsString(),(JsonObject) json);
         }
         for(JsonElement json:payload.getAsJsonArray("services")){
-            services.put(((JsonObject)json).get("serviceName").getAsString(),(JsonObject) json);
+            services.put(((JsonObject)json).get("serviceName").getAsString(),new Service( json.getAsJsonObject()));
         }
-
     }
 
     public static boolean isValidDeviceShadow(JsonElement json){
@@ -126,4 +125,7 @@ public class DeviceShadow {
         }
     }
 
+    public Service getServiceByName(String serviceName){
+        return  services.get(serviceName);
+    }
 }

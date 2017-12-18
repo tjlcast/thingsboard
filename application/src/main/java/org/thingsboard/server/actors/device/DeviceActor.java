@@ -69,7 +69,7 @@ public class DeviceActor extends ContextAwareActor {
                 processor.processNameOrTypeUpdate((DeviceNameOrTypeUpdateMsg) msg);
                 //TODO modified by cc
             }else if(msg instanceof  DeviceShadowMsg){
-                processor.processDeviceShadowMsg((DeviceShadowMsg)msg);
+                processor.processDeviceShadowMsg(context(),(DeviceShadowMsg)msg);
             }
         } else if (msg instanceof TimeoutMsg) {
             processor.processTimeout(context(), (TimeoutMsg) msg);

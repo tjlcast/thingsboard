@@ -21,6 +21,7 @@ import akka.event.LoggingAdapter;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import okhttp3.Response;
 import org.thingsboard.server.actors.ActorSystemContext;
 import org.thingsboard.server.actors.rule.*;
 import org.thingsboard.server.actors.shared.AbstractContextAwareMsgProcessor;
@@ -31,6 +32,7 @@ import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.SessionId;
 import org.thingsboard.server.common.data.kv.*;
+import org.thingsboard.server.common.data.plugin.PluginMetaData;
 import org.thingsboard.server.common.msg.cluster.ClusterEventMsg;
 import org.thingsboard.server.common.msg.cluster.ServerAddress;
 import org.thingsboard.server.common.msg.core.*;
@@ -52,6 +54,7 @@ import org.thingsboard.server.extensions.api.plugins.msg.ToDeviceRpcRequestPlugi
 import org.thingsboard.server.extensions.api.plugins.msg.ToPluginRpcResponseDeviceMsg;
 import org.thingsboard.server.transport.http.utils.StringUtil;
 import org.thingsboard.server.utils.HttpUtil;
+import org.thingsboard.server.utils.MqttUtil;
 import scala.concurrent.duration.Duration;
 import springfox.documentation.spring.web.json.Json;
 
@@ -124,8 +127,14 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
                 deviceShadow.put("deviceId",device.getId().toString());
                 //TODO send to service midware
             }else{
-                logger.debug("wrong type of device hadow format");
+                logger.debug("wrong type of device shadow format");
+                deviceShadow  = new DeviceShadow();
+                deviceShadow.put("deviceId",device.getId().toString());
             }
+        }else{
+                logger.debug("lack of params");
+                deviceShadow  = new DeviceShadow();
+                deviceShadow.put("deviceId",device.getId().toString());
         }
     };
 
@@ -465,8 +474,47 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
             }
         }
     }
+    public  void processRpcRequestFromShadow(JsonObject payLoad,ActorContext context,DeviceShadowMsg msg){
+        DeviceShadow shadow = this.deviceShadow;
+        //Service service = shadow.getServiceByName(payLoad.get("serviceName").getAsString());
+        Service service = new Service(payLoad);
+        if(service.getServiceType().equals("platform")){
+            //TODO 改成向本地发送一个http请求似乎更合理
+            processRpcRequest(context,shadowRpc2Rpc(service));
+        }else if(service.getServiceType().equals("thirdParty")){
+            processToThirdPartyrpcMsg(service,msg);
+        }else{
 
-    public void processDeviceShadowMsg(DeviceShadowMsg msg){
+        }
+    }
+
+    public void processToThirdPartyrpcMsg(Service service,DeviceShadowMsg msg){
+        String protocol = service.getProtocol().toLowerCase();
+        switch(protocol){
+            case "http":
+                Response res = HttpUtil.sendPost(service.getUrl(),service.getServiceBody().getAsString());
+                msg.setResult(res.body().toString());
+                break;
+            case "mqtt":
+                MqttUtil.sendMsg(service.getUrl(),service.getServiceBody().getAsString());
+                msg.setResult("mqtt msg send out ok");
+                break;
+            default:
+                logger.debug("unsupported protocol");
+        }
+    }
+
+    public  ToDeviceRpcRequestPluginMsg shadowRpc2Rpc(Service service){
+        PluginMetaData plugin = systemContext.getPluginService().findPluginByApiToken("rpc");
+        Device device = systemContext.getDeviceService().findDeviceById(deviceId);
+        ToDeviceRpcRequest toDeviceRpcRequest = new ToDeviceRpcRequest(UUID.randomUUID(),device.getTenantId()
+                ,deviceId,service.isRequireResponce(),System.currentTimeMillis(),
+                new ToDeviceRpcRequestBody(service.getServiceBody().get("methodName").getAsString(),service.getServiceBody().get("params").getAsString()));
+        ToDeviceRpcRequestPluginMsg res = new ToDeviceRpcRequestPluginMsg(plugin.getId(),plugin.getTenantId(),toDeviceRpcRequest);
+        return res;
+    }
+
+    public void processDeviceShadowMsg(ActorContext context,DeviceShadowMsg msg){
         //TODO  deiceactor中处理数据http请求
         JsonObject payLoad = msg.getPayLoad();
         String methodName = payLoad.get("methodName").getAsString();
@@ -485,6 +533,8 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
             systemContext.getAttributesService().save(msg.getDeviceId(),"SERVER_SCOPE",ls);
             deviceShadow.updateAttribute(attribute.get("attributeName").getAsString(),attribute);
             msg.setResult(deviceShadow.getPayload().toString());
+        }else if (methodName.equals("serviceCall")){
+            processRpcRequestFromShadow(payLoad.get("serviceBody").getAsJsonObject(),context,msg);
         }else{
             msg.setResult("Unrecognized methodName");
         }
