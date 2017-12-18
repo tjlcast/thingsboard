@@ -75,7 +75,13 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
 
     @Column(name  = DEVICE_MODEL_PROPERTY )
     private String model;//设备型号
-    
+
+    @Column(name  = DEVICE_METHOD_PROPERTY )
+    private String method;//通信方式
+
+    @Column(name  = DEVICE_STATUS_PROPERTY )
+    private String status;//运行状态
+
     @Column(name = DEVICE_ADDITIONAL_INFO_PROPERTY, codec = JsonCodec.class)
     private JsonNode additionalInfo;
 
@@ -102,10 +108,12 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         this.name = device.getName();
         this.type = device.getType();
         this.additionalInfo = device.getAdditionalInfo();
-        this.model = device.getModel();         //test
+        this.model = device.getModel();
         this.manufacture = device.getManufacture();
         this.parentDeviceId = device.getParentDeviceId();
         this.deviceType = device.getDeviceType();
+        this.method = device.getMethod();
+        this.status = device.getStatus();
     }
     
     public UUID getId() {
@@ -188,6 +196,22 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         this.model = model;
     }
 
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public JsonNode getAdditionalInfo() {
         return additionalInfo;
     }
@@ -230,6 +254,8 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         device.setModel(model);
         device.setParentDeviceId(parentDeviceId);
         device.setDeviceType(deviceType);
+        device.setMethod(method);
+        device.setStatus(status);
         return device;
     }
 

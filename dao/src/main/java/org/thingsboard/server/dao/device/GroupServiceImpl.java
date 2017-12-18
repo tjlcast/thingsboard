@@ -79,12 +79,12 @@ public class GroupServiceImpl extends AbstractEntityService implements GroupServ
         return groupDao.findByIdAsync(groupId.getId());
     }
 
-    //删除设备组，并且删除设备组下的所有设备。
+    //删除设备组，并且unassign设备组下的所有设备。
     @Override
     public void deleteGroup(GroupId groupId) {
         log.trace("Executing deleteGroup [{}]", groupId);
         validateId(groupId, "Incorrect groupId " + groupId);
-        deviceService.deleteDevicesByGroupId(groupId);
+        deviceService.unassignDevicesByGroupId(groupId);
         groupDao.removeById(groupId.getId());
     }
 

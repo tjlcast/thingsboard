@@ -37,6 +37,8 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
     private String deviceType;//设备
     private String model;//型号
     private String parentDeviceId;//父设备id
+    private String method; //通信方式
+    private String status; //运行状态
     private transient JsonNode additionalInfo;
 
     public Device() {
@@ -59,6 +61,8 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
         this.model = device.getModel();
         this.parentDeviceId = device.getParentDeviceId();
         this.deviceType = device.getDeviceType();
+        this.method = device.getMethod();
+        this.status = device.getStatus();
     }
 
 
@@ -143,7 +147,23 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
     public void setParentDeviceId(String parentDeviceId) {
         this.parentDeviceId = parentDeviceId;
     }
-    
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String getSearchText() {
         return getName();
@@ -161,6 +181,8 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
                 ", deviceType='" + deviceType + '\'' +
                 ", model='" + model + '\'' +
                 ", parentDeviceId='" + parentDeviceId + '\'' +
+                ", method='" + method + '\'' +
+                ", status='" + status + '\'' +
                 ", additionalInfo=" + additionalInfo +
                 '}';
     }

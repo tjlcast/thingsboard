@@ -90,9 +90,9 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         return saveDevice(device);
     }
 
-    //******删除设备组中的所有设备******
+    //******Unassign设备组中的所有设备******
     @Override
-    public void deleteDevicesByGroupId(GroupId groupId) {
+    public void unassignDevicesByGroupId(GroupId groupId) {
         log.trace("Executing deleteDevicesByGroupId, groupId [{}]", groupId);
         validateId(groupId, INCORRECT_GROUP_ID + groupId);
         TextPageLink pageLink = new TextPageLink(1);
@@ -100,7 +100,8 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         while (hasNext) {
             List<Device> devices = deviceDao.findDevicesByGroupId(groupId.getId(), pageLink);
             for (Device device : devices) {
-                deleteDevice(new DeviceId(device.getUuidId()));
+                device.setGroupId(new GroupId(NULL_UUID));
+                deviceDao.save(device);
             }
             hasNext = devices.size() == pageLink.getLimit();
             if (hasNext) {
