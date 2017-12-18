@@ -28,7 +28,6 @@ import org.thingsboard.server.common.data.page.TextPageLink;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface DeviceService {
     
@@ -58,7 +57,7 @@ public interface DeviceService {
 
     void deleteDevicesByTenantId(TenantId tenantId);
 
-    void deleteDevicesByGroupId(GroupId groupId);
+    void unassignDevicesByGroupId(GroupId groupId);
 
     TextPageData<Device> findDevicesByTenantIdAndCustomerId(TenantId tenantId, CustomerId customerId, TextPageLink pageLink);
 
