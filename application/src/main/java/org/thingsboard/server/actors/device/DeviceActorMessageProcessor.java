@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import okhttp3.Response;
+import org.springframework.web.context.request.async.DeferredResult;
 import org.thingsboard.server.actors.ActorSystemContext;
 import org.thingsboard.server.actors.rule.*;
 import org.thingsboard.server.actors.shared.AbstractContextAwareMsgProcessor;
@@ -77,6 +78,7 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
     private final Map<SessionId, SessionInfo> rpcSubscriptions;
 
     private final Map<Integer, ToDeviceRpcRequestMetadata> rpcPendingMap;
+    private final WeakHashMap<String, DeviceShadowMsg> rpcPendingMapFromDeviceShadow;
 
     private DeviceShadow deviceShadow;
 
@@ -92,6 +94,7 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         this.attributeSubscriptions = new HashMap<>();
         this.rpcSubscriptions = new HashMap<>();
         this.rpcPendingMap = new HashMap<>();
+        this.rpcPendingMapFromDeviceShadow = new WeakHashMap<>();
         initAttributes();
 
         //TODO 初始化设备影子并开启心跳
@@ -327,17 +330,25 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
             ToDeviceRpcRequestMetadata requestMd = rpcPendingMap.remove(responseMsg.getRequestId());
             boolean success = requestMd != null;
             if (success) {
-                ToPluginRpcResponseDeviceMsg responsePluginMsg = toPluginRpcResponseMsg(requestMd.getMsg(), responseMsg.getData());
-                Optional<ServerAddress> pluginServerAddress = requestMd.getMsg().getServerAddress();
-                if (pluginServerAddress.isPresent()) {
-                    systemContext.getRpcService().tell(pluginServerAddress.get(), responsePluginMsg);
-                    logger.debug("[{}] Rpc command response sent to remote plugin actor [{}]!", deviceId, requestMd.getMsg().getMsg().getId());
-                } else {
-                    context.parent().tell(responsePluginMsg, ActorRef.noSender());
-                    logger.debug("[{}] Rpc command response sent to local plugin actor [{}]!", deviceId, requestMd.getMsg().getMsg().getId());
+                DeviceShadowMsg  mg = rpcPendingMapFromDeviceShadow.remove(requestMd.getMsg().getMsg().getId().toString());
+                if(mg!=null){
+                    mg.setResult(((ToDeviceRpcResponseMsg) inMsg).getData());
+                }else{
+                    ToPluginRpcResponseDeviceMsg responsePluginMsg = toPluginRpcResponseMsg(requestMd.getMsg(), responseMsg.getData());
+                    Optional<ServerAddress> pluginServerAddress = requestMd.getMsg().getServerAddress();
+                    if (pluginServerAddress.isPresent()) {
+                        systemContext.getRpcService().tell(pluginServerAddress.get(), responsePluginMsg);
+                        logger.debug("[{}] Rpc command response sent to remote plugin actor [{}]!", deviceId, requestMd.getMsg().getMsg().getId());
+                    } else {
+                        context.parent().tell(responsePluginMsg, ActorRef.noSender());
+                        logger.debug("[{}] Rpc command response sent to local plugin actor [{}]!", deviceId, requestMd.getMsg().getMsg().getId());
+                    }
+
                 }
             } else {
-                logger.debug("[{}] Rpc command response [{}] is stale!", deviceId, responseMsg.getRequestId());
+
+                    logger.debug("[{}] Rpc command response [{}] is stale!", deviceId, responseMsg.getRequestId());
+
             }
             if (msg.getSessionType() == SessionType.SYNC) {
                 BasicCommandAckResponse response = success
@@ -480,7 +491,14 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         Service service = new Service(payLoad);
         if(service.getServiceType().equals("platform")){
             //TODO 改成向本地发送一个http请求似乎更合理
-            processRpcRequest(context,shadowRpc2Rpc(service));
+            ToDeviceRpcRequestPluginMsg msg1 = shadowRpc2Rpc(service);
+            UUID id = msg1.getMsg().getId();
+            if(msg1.getMsg().isOneway()){
+                msg.setResult("ok");
+            }else{
+                rpcPendingMapFromDeviceShadow.put(id.toString(),msg);
+            }
+            processRpcRequest(context,msg1);
         }else if(service.getServiceType().equals("thirdParty")){
             processToThirdPartyrpcMsg(service,msg);
         }else{
@@ -508,7 +526,7 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         PluginMetaData plugin = systemContext.getPluginService().findPluginByApiToken("rpc");
         Device device = systemContext.getDeviceService().findDeviceById(deviceId);
         ToDeviceRpcRequest toDeviceRpcRequest = new ToDeviceRpcRequest(UUID.randomUUID(),device.getTenantId()
-                ,deviceId,service.isRequireResponce(),System.currentTimeMillis(),
+                ,deviceId,!service.isRequireResponce(),System.currentTimeMillis()+1000l,
                 new ToDeviceRpcRequestBody(service.getServiceBody().get("methodName").getAsString(),service.getServiceBody().get("params").getAsString()));
         ToDeviceRpcRequestPluginMsg res = new ToDeviceRpcRequestPluginMsg(plugin.getId(),plugin.getTenantId(),toDeviceRpcRequest);
         return res;

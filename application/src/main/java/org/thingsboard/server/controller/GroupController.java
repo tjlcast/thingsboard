@@ -1,5 +1,6 @@
 package org.thingsboard.server.controller;
 
+import com.datastax.driver.core.utils.UUIDs;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -41,7 +42,7 @@ public class GroupController extends BaseController{
         TenantId tId = getCurrentUser().getTenantId();
         CustomerId cId = getCurrentUser().getCustomerId();
         JsonObject job = new JsonParser().parse(json).getAsJsonObject();
-        Group group = new Group(GroupId.fromString(UUID.randomUUID().toString()));
+        Group group = new Group(GroupId.fromString(UUIDs.timeBased().toString()));
         group.setCustomerId(cId);
         group.setTenantId(tId);
         group.setName(job.get("groupName").getAsString());

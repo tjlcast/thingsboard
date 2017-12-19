@@ -21,15 +21,28 @@ public class HttpUtil {
     static final private OkHttpClient httpClient = new OkHttpClient();
      static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-    public static JsonObject getDeviceShadowDoc(String manufactory,String deviceType,String model){
-        String url = baseUrl+"/"+manufactory+"/"+deviceType+"/"+model+".json";
+     public static void main(String[] args){
+        System.out.println(System.currentTimeMillis());
+        try{
+            Thread.sleep(1000);
+        }catch(Exception e){
+
+        }
+         System.out.println(System.currentTimeMillis());
+
+     }
+
+    public static JsonObject getDeviceShadowDoc(String manufacture,String deviceType,String model){
+        String url = baseUrl+"/"+manufacture+"/"+deviceType+"/"+model+".json";
         Request request = new Request.Builder()
                 .url(url)
                 .build();
         Call call = httpClient.newCall(request);
         try {
             Response response = call.execute();
-            return new JsonParser().parse(response.body().toString()).getAsJsonObject();
+
+            //System.out.println(response.body().string());
+            return new JsonParser().parse(response.body().string()).getAsJsonObject();
         } catch (IOException e) {
             e.printStackTrace();
         }
