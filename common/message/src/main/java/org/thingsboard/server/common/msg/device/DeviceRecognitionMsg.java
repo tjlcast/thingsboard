@@ -6,10 +6,12 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.msg.aware.DeviceAwareMsg;
 import org.thingsboard.server.common.msg.aware.TenantAwareMsg;
 
+import java.io.Serializable;
+
 /**
  * Created by Administrator on 2017/12/10.
  */
-public class DeviceRecognitionMsg implements TenantAwareMsg,DeviceAwareMsg{
+public class DeviceRecognitionMsg implements TenantAwareMsg,DeviceAwareMsg,Serializable{
 
     private final String manufacture;
     private final String deviceType;
