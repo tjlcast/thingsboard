@@ -62,14 +62,14 @@ public class GroupController extends BaseController{
     }
 
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/{tenantId}/groups", method = RequestMethod.GET)
+    @RequestMapping(value = "/groups", method = RequestMethod.GET)
     @ResponseBody
-    public TextPageData<Group> findGroups(@PathVariable("tenantId") String tId, @RequestParam int limit,
+    public TextPageData<Group> listGroups(@RequestParam int limit,
                                           @RequestParam(required = false) String textSearch,
                                           @RequestParam(required = false) String idOffset,
                                           @RequestParam(required = false) String textOffset) throws Exception {
-        TenantId tenantId =  new TenantId(UUID.fromString(tId));
-
+        //TenantId tenantId =  new TenantId(UUID.fromString(tId));
+        TenantId tenantId = getCurrentUser().getTenantId();
         TextPageLink link = createPageLink(limit,textSearch,idOffset,textOffset);
 
         return groupService.findGroupsByTenantId(tenantId,link);
