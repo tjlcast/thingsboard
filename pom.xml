@@ -324,6 +324,11 @@
             </dependency>
             <dependency>
                 <groupId>org.thingsboard</groupId>
+                <artifactId>extensions-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.thingsboard</groupId>
                 <artifactId>extensions-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
