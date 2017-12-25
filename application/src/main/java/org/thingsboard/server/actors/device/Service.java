@@ -34,14 +34,14 @@ public class Service {
     private JsonObject serviceBody;
 
     public Service(JsonObject payLoad){
-        serviceName = payLoad.get("serviceName").getAsString();
-        serviceDescription = payLoad.get("serviceDescription").getAsString();
-        serviceType = payLoad.get("serviceType").getAsString();
-        protocol = payLoad.get("protocol").getAsString();
-        otherInfo = payLoad.get("otherInfo").getAsJsonObject();
-        url = payLoad.get("url").getAsString();
-        requireResponce = payLoad.get("requireResponce").getAsBoolean();
-        serviceBody = payLoad.get("serviceBody").getAsJsonObject();
+        serviceName = payLoad.get("serviceName")!=null?payLoad.get("serviceName").getAsString():null;
+        serviceDescription = payLoad.get("serviceDescription")!=null?payLoad.get("serviceDescription").getAsString():null;
+        serviceType = payLoad.get("serviceType")!=null?payLoad.get("serviceType").getAsString():null;
+        protocol = payLoad.get("protocol")!=null?payLoad.get("protocol").getAsString():null;
+        otherInfo = payLoad.get("otherInfo")!=null?payLoad.get("otherInfo").getAsJsonObject():null;
+        url = payLoad.get("url")!=null?payLoad.get("url").getAsString():null;
+        requireResponce = payLoad.get("requireResponce")!=null?payLoad.get("requireResponce").getAsBoolean():null;
+        serviceBody = payLoad.get("serviceBody")!=null?payLoad.get("serviceBody").getAsJsonObject():null;
     }
 
 

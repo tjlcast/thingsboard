@@ -19,6 +19,7 @@ import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import akka.event.LoggingAdapter;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import okhttp3.Response;
@@ -481,7 +482,7 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
                 deviceShadow.put("deviceId",device.getId().toString());
                 //TODO send to service midware
             }else{
-                logger.debug("wrong type of device hadow format");
+                logger.debug("wrong type of device shadow format");
             }
         }
     }
@@ -510,11 +511,15 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         String protocol = service.getProtocol().toLowerCase();
         switch(protocol){
             case "http":
-                Response res = HttpUtil.sendPost(service.getUrl(),service.getOtherInfo(),service.getServiceBody().getAsString());
-                msg.setResult(res.body().toString());
+                try{
+                    Response res = HttpUtil.sendPost(service.getUrl(),service.getOtherInfo(),service.getServiceBody().toString());
+                    msg.setResult(res.body().string());
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
                 break;
             case "mqtt":
-                MqttUtil.sendMsg(service.getUrl(),service.getOtherInfo(),service.getServiceBody().getAsString());
+                MqttUtil.sendMsg(service.getUrl(),service.getOtherInfo(),service.getServiceBody().toString());
                 msg.setResult("mqtt msg send out ok");
                 break;
             default:
@@ -527,7 +532,7 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         Device device = systemContext.getDeviceService().findDeviceById(deviceId);
         ToDeviceRpcRequest toDeviceRpcRequest = new ToDeviceRpcRequest(UUID.randomUUID(),device.getTenantId()
                 ,deviceId,!service.isRequireResponce(),System.currentTimeMillis()+1000l,
-                new ToDeviceRpcRequestBody(service.getServiceBody().get("methodName").getAsString(),service.getServiceBody().get("params").getAsString()));
+                new ToDeviceRpcRequestBody(service.getServiceBody().get("methodName").getAsString(),service.getServiceBody().get("params").toString()));
         ToDeviceRpcRequestPluginMsg res = new ToDeviceRpcRequestPluginMsg(plugin.getId(),plugin.getTenantId(),toDeviceRpcRequest);
         return res;
     }
@@ -535,7 +540,8 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
     public void processDeviceShadowMsg(ActorContext context,DeviceShadowMsg msg){
         //TODO  deiceactor中处理数据http请求
         JsonObject payLoad = msg.getPayLoad();
-        String methodName = payLoad.get("methodName").getAsString();
+        JsonElement ele = payLoad.get("requestName");
+        String methodName = ele.getAsString();
         if(methodName==null){
             msg.setResult("methodName is null");
         }else if(methodName.equals("get")){
@@ -552,7 +558,7 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
             deviceShadow.updateAttribute(attribute.get("attributeName").getAsString(),attribute);
             msg.setResult(deviceShadow.getPayload().toString());
         }else if (methodName.equals("serviceCall")){
-            processRpcRequestFromShadow(payLoad.get("serviceBody").getAsJsonObject(),context,msg);
+            processRpcRequestFromShadow(payLoad.get("requestBody").getAsJsonObject(),context,msg);
         }else{
             msg.setResult("Unrecognized methodName");
         }
