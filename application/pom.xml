@@ -599,7 +599,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <finalName>${pkg.name}</finalName>s
+                    <finalName>${pkg.name}</finalName>
                     <descriptors>
                         <descriptor>src/main/assembly/windows.xml</descriptor>
                     </descriptors>
