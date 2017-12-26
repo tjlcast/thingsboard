@@ -25,7 +25,7 @@ public class ServiceTableController extends BaseController{
     ServiceTableService serviceTableService;
 
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
-    @RequestMapping(value = "/servicetable/save", method = RequestMethod.GET)
+    @RequestMapping(value = "/servicetable/save", method = RequestMethod.POST)
     @ResponseBody
     public ServiceTable save(@RequestBody  String json) throws ThingsboardException {
         JsonObject service = new JsonParser().parse(json).getAsJsonObject();
