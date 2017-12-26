@@ -90,6 +90,15 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         return saveDevice(device);
     }
 
+    @Override
+    public void unassignDeviceFromGroup(DeviceId deviceId){
+        log.trace("Executing deleteDevicesByGroupId, deviceId [{}]", deviceId);
+        validateId(deviceId, INCORRECT_GROUP_ID + deviceId);
+        Device device = deviceDao.findById(deviceId.getId());
+        device.setGroupId(new GroupId(NULL_UUID));
+        deviceDao.save(device);
+    }
+
     //******Unassign设备组中的所有设备******
     @Override
     public void unassignDevicesByGroupId(GroupId groupId) {
