@@ -45,6 +45,16 @@ public class ModelConstants {
     public static final String ENTITY_TYPE_PROPERTY = "entity_type";
 
     /**
+     * Cassandra service constants.
+     */
+    public static final String SERVICE_COLUMN_FAMILY_NAME = "service";
+    public static final String SERVICE_ID_PROPERTY = ID_PROPERTY;
+    public static final String SERVICE_COORDINATE_PROPERTY = "coordinate";
+    public static final String SERVICE_DESCRIPTION_PROPERTY = "description";
+
+    public static final String SERVICE_BY_COORDINATE_COLUMN_FAMILY_NAME = "service_by_coordinate";
+
+    /**
      * Cassandra user constants.
      */
     public static final String USER_COLUMN_FAMILY_NAME = "user";

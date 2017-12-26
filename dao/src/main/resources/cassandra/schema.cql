@@ -225,6 +225,20 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.device_credentials_by_credent
 	WHERE credentials_id IS NOT NULL AND id IS NOT NULL
 	PRIMARY KEY ( credentials_id, id );
 
+CREATE TABLE IF NOT EXISTS thingsboard.service (
+  id timeuuid,
+  coordinate text,
+  description text,
+  PRIMARY KEY (id, coordinate)
+);
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.service_by_coordinate AS
+  SELECT *
+  from thingsboard.service
+  WHERE id IS NOT NULL AND coordinate IS NOT NULL
+  PRIMARY KEY ( coordinate, id)
+  WITH CLUSTERING ORDER BY ( coordinate ASC, id DESC );
+
 CREATE TABLE IF NOT EXISTS thingsboard.group (
     id timeuuid,
     tenant_id timeuuid,

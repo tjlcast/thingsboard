@@ -59,6 +59,8 @@ public interface DeviceService {
 
     void unassignDevicesByGroupId(GroupId groupId);
 
+    void unassignDeviceFromGroup(DeviceId deviceId);
+
     TextPageData<Device> findDevicesByTenantIdAndCustomerId(TenantId tenantId, CustomerId customerId, TextPageLink pageLink);
 
     TextPageData<Device> findDevicesByTenantIdAndCustomerIdAndType(TenantId tenantId, CustomerId customerId, String type, TextPageLink pageLink);

@@ -101,6 +101,16 @@ public class GroupController extends BaseController{
     }
 
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
+    @RequestMapping(value = "/unassign/{deviceId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Device unAssignDeviceFromGroup(@PathVariable("deviceId") String dId) throws Exception {
+        DeviceId deviceId = DeviceId.fromString(dId);
+         deviceService.unassignDeviceFromGroup(deviceId);
+        Device device = deviceService.findDeviceById(deviceId);
+        return device;
+    }
+
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/{groupId}/devices", method = RequestMethod.GET)
     @ResponseBody
     public TextPageData<Device>  getDevicesByGroupId(@PathVariable("groupId") String gId,@RequestParam int limit,
@@ -111,4 +121,6 @@ public class GroupController extends BaseController{
         TextPageLink link = createPageLink(limit,textSearch,idOffset,textOffset);
         return deviceService.findDevicesByGroupId(groupId,link);
     }
+
+
 }
