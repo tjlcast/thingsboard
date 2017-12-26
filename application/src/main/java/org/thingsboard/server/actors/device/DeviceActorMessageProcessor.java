@@ -30,6 +30,7 @@ import org.thingsboard.server.actors.shared.AbstractContextAwareMsgProcessor;
 import org.thingsboard.server.actors.tenant.RuleChainDeviceMsg;
 import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.ServiceTable;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.SessionId;
@@ -125,7 +126,11 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         String deviceType = device.getDeviceType();
         String model = device.getModel();
         if(StringUtil.checkNotNull(manufacture,deviceType,model)){
-            JsonObject shadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
+            Optional<ServiceTable> serviceTable = systemContext.getServiceTableService().findServiceTableByCoordinate(
+                    manufacture+"-"+deviceType+"-"+model);
+            //JsonObject shadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
+            if(!serviceTable.isPresent()) return ;
+            JsonObject shadow = new JsonParser().parse(serviceTable.get().getDescription()).getAsJsonObject();
             if(DeviceShadow.isValidDeviceShadow(shadow)){
                 deviceShadow = new DeviceShadow(shadow);
                 deviceShadow.put("deviceId",device.getId().toString());
@@ -476,7 +481,9 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         String deviceType = msg.getDeviceType();
         String model = msg.getModel();
         if(StringUtil.checkNotNull(manufacture,deviceType,model)){
-            JsonObject shadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
+            String des = systemContext.getServiceTableService().findServiceTableByCoordinate(manufacture+"-"+deviceType+"-"+model).get().getDescription();
+            JsonObject shadow  =  new JsonParser().parse(des).getAsJsonObject();
+          //  JsonObject shadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
             if(DeviceShadow.isValidDeviceShadow(shadow)){
                 deviceShadow = new DeviceShadow(shadow);
                 deviceShadow.put("deviceId",device.getId().toString());

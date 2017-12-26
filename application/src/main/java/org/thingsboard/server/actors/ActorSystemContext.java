@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 import org.thingsboard.server.actors.service.ActorService;
 import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.Event;
+import org.thingsboard.server.common.data.ServiceTable;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.plugin.ComponentLifecycleEvent;
@@ -46,6 +47,7 @@ import org.thingsboard.server.dao.event.EventService;
 import org.thingsboard.server.dao.plugin.PluginService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rule.RuleService;
+import org.thingsboard.server.dao.serviceTable.ServiceTableService;
 import org.thingsboard.server.dao.tenant.TenantService;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
 import org.thingsboard.server.service.cluster.discovery.DiscoveryService;
@@ -115,6 +117,9 @@ public class ActorSystemContext {
 
     @Autowired
     @Getter @Setter private PluginWebSocketMsgEndpoint wsMsgEndpoint;
+
+    @Autowired
+    @Getter @Setter private ServiceTableService serviceTableService;
 
     @Value("${actors.session.sync.timeout}")
     @Getter private long syncSessionTimeout;
