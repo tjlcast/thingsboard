@@ -77,6 +77,15 @@ public class ServiceTableController extends BaseController{
         return serviceTableService.findServiceTables();
     }
 
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+    @RequestMapping(value = "/services/{manufacture}/{deviceType}/{model}", method = RequestMethod.GET)
+    @ResponseBody
+    public String serviceTableList(@PathVariable String manufacture,@PathVariable String deviceType,@PathVariable String model) throws ThingsboardException {
+        String coordinate = manufacture+"%"+deviceType+"%"+model;
+        Optional<ServiceTable> table = serviceTableService.findServiceTableByCoordinate(coordinate);
+        return new JsonParser().parse(table.get().getDescription()).getAsJsonObject().get("services").toString();
+    }
+
     private String getCoordinate(JsonObject service){
         String manufacture = service.get("manufacture").getAsString();
         String deviceType = service.get("deviceType").getAsString();
