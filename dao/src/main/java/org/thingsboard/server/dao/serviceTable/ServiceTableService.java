@@ -15,9 +15,11 @@
  */
 package org.thingsboard.server.dao.serviceTable;
 
+import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.ServiceTable;
 import org.thingsboard.server.common.data.id.ServiceTableId;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -26,6 +28,8 @@ import java.util.Optional;
 public interface ServiceTableService {
 
     ServiceTable saveServiceTable(ServiceTable serviceTable);
+
+    List<ServiceTable> findServiceTables();
 
     Optional<ServiceTable> findServiceTableByCoordinate(String coordinate);
 

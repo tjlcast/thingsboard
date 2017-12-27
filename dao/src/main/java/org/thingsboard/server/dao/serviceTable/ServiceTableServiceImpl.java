@@ -24,6 +24,7 @@ import org.thingsboard.server.common.data.id.ServiceTableId;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.service.DataValidator;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
@@ -43,6 +44,12 @@ public class ServiceTableServiceImpl implements ServiceTableService{
         log.trace("Executing saveServiceTable [{}]", serviceTable);
         serviceTableDataValidator.validate(serviceTable);
         return serviceTableDao.save(serviceTable);
+    }
+
+    @Override
+    public List<ServiceTable> findServiceTables() {
+        log.trace("Executing findServiceTables");
+        return serviceTableDao.find();
     }
 
     @Override

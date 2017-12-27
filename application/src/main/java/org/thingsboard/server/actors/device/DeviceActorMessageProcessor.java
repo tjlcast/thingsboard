@@ -127,7 +127,7 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         String model = device.getModel();
         if(StringUtil.checkNotNull(manufacture,deviceType,model)){
             Optional<ServiceTable> serviceTable = systemContext.getServiceTableService().findServiceTableByCoordinate(
-                    manufacture+"-"+deviceType+"-"+model);
+                    manufacture+"%"+deviceType+"%"+model);
             //JsonObject shadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
             if(!serviceTable.isPresent()) return ;
             JsonObject shadow = new JsonParser().parse(serviceTable.get().getDescription()).getAsJsonObject();
@@ -481,7 +481,7 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         String deviceType = msg.getDeviceType();
         String model = msg.getModel();
         if(StringUtil.checkNotNull(manufacture,deviceType,model)){
-            String des = systemContext.getServiceTableService().findServiceTableByCoordinate(manufacture+"-"+deviceType+"-"+model).get().getDescription();
+            String des = systemContext.getServiceTableService().findServiceTableByCoordinate(manufacture+"%"+deviceType+"%"+model).get().getDescription();
             JsonObject shadow  =  new JsonParser().parse(des).getAsJsonObject();
           //  JsonObject shadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
             if(DeviceShadow.isValidDeviceShadow(shadow)){
