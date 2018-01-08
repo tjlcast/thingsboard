@@ -28,6 +28,7 @@ import org.thingsboard.server.actors.ActorSystemContext;
 import org.thingsboard.server.actors.rule.*;
 import org.thingsboard.server.actors.shared.AbstractContextAwareMsgProcessor;
 import org.thingsboard.server.actors.tenant.RuleChainDeviceMsg;
+import org.thingsboard.server.actors.tenant.ServiceGroupUpdateMsg;
 import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.ServiceTable;
@@ -121,30 +122,31 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
 
     private void initDeviceShadow(){
         Device device = systemContext.getDeviceService().findDeviceById(deviceId);
-        systemContext.getAttributesService();
-        String manufacture = device.getManufacture();
-        String deviceType = device.getDeviceType();
-        String model = device.getModel();
-        if(StringUtil.checkNotNull(manufacture,deviceType,model)){
-            Optional<ServiceTable> serviceTable = systemContext.getServiceTableService().findServiceTableByCoordinate(
-                    manufacture+"%"+deviceType+"%"+model);
-            //JsonObject shadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
-            if(!serviceTable.isPresent()) return ;
-            JsonObject shadow = new JsonParser().parse(serviceTable.get().getDescription()).getAsJsonObject();
-            if(DeviceShadow.isValidDeviceShadow(shadow)){
-                deviceShadow = new DeviceShadow(shadow);
-                deviceShadow.put("deviceId",device.getId().toString());
-                //TODO send to service midware
-            }else{
-                logger.debug("wrong type of device shadow format");
-                deviceShadow  = new DeviceShadow();
-                deviceShadow.put("deviceId",device.getId().toString());
-            }
-        }else{
-                logger.debug("lack of params");
-                deviceShadow  = new DeviceShadow();
-                deviceShadow.put("deviceId",device.getId().toString());
-        }
+        deviceShadow = new DeviceShadow(systemContext,device);
+      //  systemContext.getAttributesService();
+//        String manufacture = device.getManufacture();
+//        String deviceType = device.getDeviceType();
+//        String model = device.getModel();
+//        if(StringUtil.checkNotNull(manufacture,deviceType,model)){
+//            Optional<ServiceTable> serviceTable = systemContext.getServiceTableService().findServiceTableByCoordinate(
+//                    manufacture+"%"+deviceType+"%"+model);
+//            //JsonObject shadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
+//            if(!serviceTable.isPresent()) return ;
+//            JsonObject shadow = new JsonParser().parse(serviceTable.get().getDescription()).getAsJsonObject();
+//            if(DeviceShadow.isValidDeviceShadow(shadow)){
+//                deviceShadow = new DeviceShadow(systemContext,device);
+//                deviceShadow.put("deviceId",device.getId().toString());
+//                //TODO send to service midware
+//            }else{
+//                logger.debug("wrong type of device shadow format");
+//                deviceShadow  = new DeviceShadow(systemContext,device);
+//                deviceShadow.put("deviceId",device.getId().toString());
+//            }
+//        }else{
+//                logger.debug("lack of params");
+//                deviceShadow  = new DeviceShadow(systemContext,device);
+//                deviceShadow.put("deviceId",device.getId().toString());
+//        }
     };
 
     private void refreshAttributes(DeviceAttributesEventNotificationMsg msg) {
@@ -477,71 +479,38 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
     public void process(DeviceRecognitionMsg msg){
         //TODO modefied by cc
         Device device = systemContext.getDeviceService().findDeviceById(deviceId);
-        String manufacture = msg.getManufacture();
-        String deviceType = msg.getDeviceType();
-        String model = msg.getModel();
-        if(StringUtil.checkNotNull(manufacture,deviceType,model)){
-            String des = systemContext.getServiceTableService().findServiceTableByCoordinate(manufacture+"%"+deviceType+"%"+model).get().getDescription();
-            JsonObject shadow  =  new JsonParser().parse(des).getAsJsonObject();
-          //  JsonObject shadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
-            if(DeviceShadow.isValidDeviceShadow(shadow)){
-                deviceShadow = new DeviceShadow(shadow);
-                deviceShadow.put("deviceId",device.getId().toString());
-                //TODO send to service midware
-            }else{
-                logger.debug("wrong type of device shadow format");
-            }
-        }
+        deviceShadow = new DeviceShadow(systemContext,device);
+//        String manufacture = msg.getManufacture();
+//        String deviceType = msg.getDeviceType();
+//        String model = msg.getModel();
+//        if(StringUtil.checkNotNull(manufacture,deviceType,model)){
+//            String des = systemContext.getServiceTableService().findServiceTableByCoordinate(manufacture+"%"+deviceType+"%"+model).get().getDescription();
+//            JsonObject shadow  =  new JsonParser().parse(des).getAsJsonObject();
+//          //  JsonObject shadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
+//            if(DeviceShadow.isValidDeviceShadow(shadow)){
+//                deviceShadow = new DeviceShadow(shadow,systemContext,device);
+//                deviceShadow.put("deviceId",device.getId().toString());
+//                //TODO send to service midware
+//            }else{
+//                logger.debug("wrong type of device shadow format");
+//            }
+//        }
     }
-    public  void processRpcRequestFromShadow(JsonObject payLoad,ActorContext context,DeviceShadowMsg msg){
+    public  void processRpcRequestFromShadow(JsonObject paramsAndServiceName,ActorContext context,DeviceShadowMsg msg){
         DeviceShadow shadow = this.deviceShadow;
         //Service service = shadow.getServiceByName(payLoad.get("serviceName").getAsString());
-        Service service = new Service(payLoad);
-        if(service.getServiceType().equals("platform")){
-            //TODO 改成向本地发送一个http请求似乎更合理
-            ToDeviceRpcRequestPluginMsg msg1 = shadowRpc2Rpc(service);
-            UUID id = msg1.getMsg().getId();
-            if(msg1.getMsg().isOneway()){
-                msg.setResult("ok");
-            }else{
-                rpcPendingMapFromDeviceShadow.put(id.toString(),msg);
-            }
-            processRpcRequest(context,msg1);
-        }else if(service.getServiceType().equals("thirdParty")){
-            processToThirdPartyrpcMsg(service,msg);
-        }else{
-
-        }
+        Service service = shadow.getServiceByName(paramsAndServiceName.get("serviceName").getAsString());
+        paramsAndServiceName.remove("serviceName");
+       // Service service = new Service(payLoad);
+        service.serviceCall(msg,paramsAndServiceName,this,rpcPendingMapFromDeviceShadow,context);
     }
 
-    public void processToThirdPartyrpcMsg(Service service,DeviceShadowMsg msg){
-        String protocol = service.getProtocol().toLowerCase();
-        switch(protocol){
-            case "http":
-                try{
-                    Response res = HttpUtil.sendPost(service.getUrl(),service.getOtherInfo(),service.getServiceBody().toString());
-                    msg.setResult(res.body().string());
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
-                break;
-            case "mqtt":
-                MqttUtil.sendMsg(service.getUrl(),service.getOtherInfo(),service.getServiceBody().toString());
-                msg.setResult("mqtt msg send out ok");
-                break;
-            default:
-                logger.debug("unsupported protocol");
+    public  void processServiceGroupUpdateMsg(ServiceGroupUpdateMsg msg){
+        Device device = deviceShadow.getDevice();
+        if(msg.getManufacture().equals(device.getManufacture())&&msg.getDeviceType().equals(device.getDeviceType())
+               &&msg.getModel().equals(device.getModel())){
+            initDeviceShadow();
         }
-    }
-
-    public  ToDeviceRpcRequestPluginMsg shadowRpc2Rpc(Service service){
-        PluginMetaData plugin = systemContext.getPluginService().findPluginByApiToken("rpc");
-        Device device = systemContext.getDeviceService().findDeviceById(deviceId);
-        ToDeviceRpcRequest toDeviceRpcRequest = new ToDeviceRpcRequest(UUID.randomUUID(),device.getTenantId()
-                ,deviceId,!service.isRequireResponce(),System.currentTimeMillis()+1000l,
-                new ToDeviceRpcRequestBody(service.getServiceBody().get("methodName").getAsString(),service.getServiceBody().get("params").toString()));
-        ToDeviceRpcRequestPluginMsg res = new ToDeviceRpcRequestPluginMsg(plugin.getId(),plugin.getTenantId(),toDeviceRpcRequest);
-        return res;
     }
 
     public void processDeviceShadowMsg(ActorContext context,DeviceShadowMsg msg){

@@ -30,6 +30,7 @@ import org.thingsboard.server.actors.shared.plugin.SystemPluginManager;
 import org.thingsboard.server.actors.shared.rule.RuleManager;
 import org.thingsboard.server.actors.shared.rule.SystemRuleManager;
 import org.thingsboard.server.actors.tenant.RuleChainDeviceMsg;
+import org.thingsboard.server.actors.tenant.ServiceGroupUpdateMsg;
 import org.thingsboard.server.actors.tenant.TenantActor;
 import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.id.PluginId;
@@ -117,6 +118,8 @@ public class AppActor extends ContextAwareActor {
             onPluginTerminated((PluginTerminationMsg) msg);
         } else if(msg instanceof DeviceRecognitionMsg){
             getOrCreateTenantActor(((DeviceRecognitionMsg) msg).getTenantId()).tell(msg,ActorRef.noSender());
+        }else if(msg instanceof ServiceGroupUpdateMsg){
+            getOrCreateTenantActor(((ServiceGroupUpdateMsg)msg).getTenantId()).tell(msg,ActorRef.noSender());
         }else {
             logger.warning("Unknown message: {}!", msg);
         }

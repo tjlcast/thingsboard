@@ -23,6 +23,7 @@ import org.thingsboard.server.actors.rule.RulesProcessedMsg;
 import org.thingsboard.server.actors.service.ContextAwareActor;
 import org.thingsboard.server.actors.service.ContextBasedCreator;
 import org.thingsboard.server.actors.tenant.RuleChainDeviceMsg;
+import org.thingsboard.server.actors.tenant.ServiceGroupUpdateMsg;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.msg.cluster.ClusterEventMsg;
@@ -77,7 +78,9 @@ public class DeviceActor extends ContextAwareActor {
             processor.processClusterEventMsg((ClusterEventMsg) msg);
         } else if(msg instanceof DeviceRecognitionMsg){
             processor.process((DeviceRecognitionMsg)msg);
-        }else {
+        }else if(msg instanceof ServiceGroupUpdateMsg){
+            processor.processServiceGroupUpdateMsg((ServiceGroupUpdateMsg)msg);
+        }else{
             logger.debug("[{}][{}] Unknown msg type.", tenantId, deviceId, msg.getClass().getName());
         }
     }

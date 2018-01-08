@@ -16,6 +16,7 @@
 package org.thingsboard.server.controller;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import jdk.nashorn.internal.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -47,8 +48,21 @@ public class ShadowController {
         DeferredResult<String> result = new DeferredResult<>();
         JsonParser parser = new JsonParser();
         Device device = deviceService.findDeviceById(DeviceId.fromString(deviceId));
-        DeviceShadowMsg msg = new DeviceShadowMsg(device,parser.parse(json).getAsJsonObject(),result);
-        actorService.onMsg(msg);
+        JsonObject obj = parser.parse(json).getAsJsonObject();
+        if(obj.get("requestName").getAsString().equals("serviceCall")){
+            if(device.getParentDeviceId()==null||"".equals(device.getParentDeviceId())||
+                    "13814000-1dd2-11b2-8080-808080808080".equals(device.getParentDeviceId())){
+                DeviceShadowMsg msg = new DeviceShadowMsg(device,parser.parse(json).getAsJsonObject(),result);
+                actorService.onMsg(msg);
+            }else{
+              Device parentDevice =  deviceService.findDeviceById(DeviceId.fromString(device.getParentDeviceId()));
+                DeviceShadowMsg msg = new DeviceShadowMsg(parentDevice,parser.parse(json).getAsJsonObject(),result);
+                actorService.onMsg(msg);
+            }
+        }else{
+            DeviceShadowMsg msg = new DeviceShadowMsg(device,parser.parse(json).getAsJsonObject(),result);
+            actorService.onMsg(msg);
+        }
         return result;
     }
 }

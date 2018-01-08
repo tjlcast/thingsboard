@@ -98,7 +98,11 @@ public class TenantActor extends ContextAwareActor {
             onPluginTerminated((PluginTerminationMsg) msg);
         } else if(msg instanceof DeviceRecognitionMsg){
             getOrCreateDeviceActor(((DeviceRecognitionMsg) msg).getDeviceId()).tell(msg,ActorRef.noSender());
-        }else {
+        }else if(msg instanceof ServiceGroupUpdateMsg){
+            for(Map.Entry<DeviceId,ActorRef> entry:deviceActors.entrySet()){
+                entry.getValue().tell(msg,ActorRef.noSender());
+            }
+        }else{
             logger.warning("[{}] Unknown message: {}!", tenantId, msg);
         }
     }
