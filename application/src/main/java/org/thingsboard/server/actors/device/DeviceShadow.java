@@ -95,9 +95,12 @@ public class DeviceShadow {
         String deviceType = device.getDeviceType();
         String model = device.getModel();
         if(!StringUtil.checkNotNull(manufacture,deviceType,model)) return;
-                Optional< ServiceTable > serviceTable =  systemContext.getServiceTableService().findServiceTableByCoordinate(
-                        manufacture+"%"+deviceType+"%"+model);
-        if(!serviceTable.isPresent()) return;
+        Optional< ServiceTable > serviceTable =  systemContext.getServiceTableService().findServiceTableByCoordinate(
+                manufacture+"%"+deviceType+"%"+model);
+        if(!serviceTable.isPresent()) {
+            System.err.println("cant find service named "+manufacture+"%"+deviceType+"%"+model);
+            return ;
+        }
         String des = serviceTable.get().getDescription();
         for(Map.Entry<String,JsonElement> entry:new JsonParser().parse(des).getAsJsonObject().entrySet()){
             Service service = new Service(entry.getValue().getAsJsonObject(),systemContext,device);

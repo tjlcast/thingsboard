@@ -72,6 +72,13 @@ public class ServiceTableController extends BaseController{
         serviceTableService.deleteServiceTable(serviceTable1.get().getId());
         ServiceGroupUpdateMsg msg  = new ServiceGroupUpdateMsg(getTenantId(),service.get("manufacture").getAsString(),
                 service.get("deviceType").getAsString(),service.get("model").getAsString());
+
+        try{
+            Thread.sleep(500);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
         ((DefaultActorService)actorService).onMsg(msg);
     }
 
@@ -91,11 +98,19 @@ public class ServiceTableController extends BaseController{
         obj.add(service.get("description").getAsJsonObject().get("serviceName").getAsString(),service.get("description"));
         serviceTable.setDescription(obj.toString());
 
+        ServiceTable ss = serviceTableService.saveServiceTable(serviceTable);
+
         ServiceGroupUpdateMsg msg  = new ServiceGroupUpdateMsg(getTenantId(),service.get("manufacture").getAsString(),
                 service.get("deviceType").getAsString(),service.get("model").getAsString());
+        //TODO 临时方法
+        try{
+            Thread.sleep(500);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
         ((DefaultActorService)actorService).onMsg(msg);
 
-       return serviceTableService.saveServiceTable(serviceTable);
+       return ss;
     }
 
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -115,8 +130,14 @@ public class ServiceTableController extends BaseController{
         serviceTable.setDescription(obj.toString());
         ServiceGroupUpdateMsg msg  = new ServiceGroupUpdateMsg(getTenantId(),service.get("manufacture").getAsString(),
                 service.get("deviceType").getAsString(),service.get("model").getAsString());
-        ((DefaultActorService)actorService).onMsg(msg);
         serviceTableService.saveServiceTable(serviceTable);
+        //TODO 临时方法
+        try{
+            Thread.sleep(500);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        ((DefaultActorService)actorService).onMsg(msg);
     }
 
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
