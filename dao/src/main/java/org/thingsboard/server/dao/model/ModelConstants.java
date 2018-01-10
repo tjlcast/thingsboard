@@ -165,6 +165,14 @@ public class ModelConstants {
     public static final String GROUP_BY_CUSTOMER_AND_NAME_COLUMN_FAMILY_NAME = "group_by_customer_and_name";
 
     /**
+     * Cassandra deviceByGroupId constants.
+     */
+    public static final String DEVICE_BY_GROUP_ID_COLUMN_FAMILY_NAME = "device_by_group_id";
+    public static final String DEVICE_BY_GROUP_ID_DEVICE_ID_PROPERTY = "device_id";
+    public static final String DEVICE_BY_GROUP_ID_GROUP_ID_PROPERTY = "group_id";
+
+    public static final String GROUP_BY_DEVICE_ID_COLUMN_FAMILY_NAME = "group_by_device_id";
+    /**
      * Cassandra asset constants.
      */
     public static final String ASSET_COLUMN_FAMILY_NAME = "asset";

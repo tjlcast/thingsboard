@@ -72,13 +72,20 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     @Autowired
     private DeviceCredentialsService deviceCredentialsService;
 
+    @Autowired
+    private DeviceByGroupIdDao deviceByGroupIdDao;
+
     //*********查找组中设备**********
     @Override
     public TextPageData<Device> findDevicesByGroupId(GroupId groupId, TextPageLink pageLink) {
         log.trace("Executing findDevicesByGroupId, groupId [{}], pageLink [{}]", groupId, pageLink);
         validateId(groupId, INCORRECT_GROUP_ID + groupId);
         validatePageLink(pageLink, INCORRECT_PAGE_LINK + pageLink);
-        List<Device> devices = deviceDao.findDevicesByGroupId(groupId.getId(), pageLink);
+        List<Device> devices = new ArrayList<Device>();
+        List<UUID> deviceIds = deviceByGroupIdDao.findDevicesByGroupId(groupId.getId());
+        for(UUID deviceId : deviceIds){
+            devices.add(deviceDao.findById(deviceId));
+        }
         return new TextPageData<>(devices, pageLink);
     }
 
@@ -86,39 +93,25 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     @Override
     public Device assignDeviceToGroup(DeviceId deviceId, GroupId groupId) {
         Device device = findDeviceById(deviceId);
-        device.setGroupId(groupId);
+        DeviceByGroupId deviceByGroupId = new DeviceByGroupId(groupId,deviceId);
+        deviceByGroupIdDao.save(deviceByGroupId);
         return saveDevice(device);
     }
 
     @Override
-    public void unassignDeviceFromGroup(DeviceId deviceId){
-        log.trace("Executing deleteDevicesByGroupId, deviceId [{}]", deviceId);
+    public void unassignDeviceFromGroup(DeviceId deviceId , GroupId groupId){
+        log.trace("Executing unassignDevicesFromGroup, deviceId [{}]  groupId [{}]", deviceId,groupId);
         validateId(deviceId, INCORRECT_GROUP_ID + deviceId);
-        Device device = deviceDao.findById(deviceId.getId());
-        device.setGroupId(new GroupId(NULL_UUID));
-        deviceDao.save(device);
+        validateId(groupId, INCORRECT_GROUP_ID + groupId);
+        deviceByGroupIdDao.delete(new DeviceByGroupId(groupId,deviceId));
     }
 
     //******Unassign设备组中的所有设备******
     @Override
     public void unassignDevicesByGroupId(GroupId groupId) {
-        log.trace("Executing deleteDevicesByGroupId, groupId [{}]", groupId);
+        log.trace("Executing unassignDevicesByGroupId, groupId [{}]", groupId);
         validateId(groupId, INCORRECT_GROUP_ID + groupId);
-        TextPageLink pageLink = new TextPageLink(1);
-        boolean hasNext = true;
-        while (hasNext) {
-            List<Device> devices = deviceDao.findDevicesByGroupId(groupId.getId(), pageLink);
-            for (Device device : devices) {
-                device.setGroupId(new GroupId(NULL_UUID));
-                deviceDao.save(device);
-            }
-            hasNext = devices.size() == pageLink.getLimit();
-            if (hasNext) {
-                int index = devices.size() - 1;
-                UUID idOffset = devices.get(index).getUuidId();
-                pageLink.setIdOffset(idOffset);
-            }
-        }
+        deviceByGroupIdDao.deleteAllByGroupId(groupId.getId());
     }
 
     @Override
@@ -185,6 +178,10 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
             deviceCredentialsService.deleteDeviceCredentials(deviceCredentials);
         }
         deleteEntityRelations(deviceId);
+        List<UUID> groupIds = deviceByGroupIdDao.findGroupsByDeviceId(deviceId.getId());
+        for(UUID groupId : groupIds){
+            deviceByGroupIdDao.delete(new DeviceByGroupId(new GroupId(groupId),deviceId));
+        }
         deviceDao.removeById(deviceId.getId());
     }
 
@@ -348,17 +345,6 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
                         }
                         if (!customer.getTenantId().getId().equals(device.getTenantId().getId())) {
                             throw new DataValidationException("Can't assign device to customer from different tenant!");
-                        }
-                    }
-                    if(device.getGroupId() == null) {
-                        device.setGroupId(new GroupId(NULL_UUID));
-                    } else if(!device.getGroupId().getId().equals(NULL_UUID)) {
-                        Group group = groupDao.findById(device.getGroupId().getId());
-                        if(group == null) {
-                            throw new DataValidationException("Can't assign device to non-existent group!");
-                        }
-                        if(!group.getTenantId().getId().equals(device.getTenantId().getId())){
-                            throw new DataValidationException("Can't assign device to group from different tenant!");
                         }
                     }
                 }

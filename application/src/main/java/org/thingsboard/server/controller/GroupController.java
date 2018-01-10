@@ -61,8 +61,8 @@ public class GroupController extends BaseController{
         group.setCustomerId(cId);
         group.setTenantId(tId);
         group.setName(job.get("groupName").getAsString());
-        groupService.saveGroup(group);
-        return group;
+        Group savedGroup =  groupService.saveGroup(group);
+        return savedGroup;
     }
 
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -105,7 +105,8 @@ public class GroupController extends BaseController{
     @ResponseBody
     public Device unAssignDeviceFromGroup(@PathVariable("deviceId") String dId) throws Exception {
         DeviceId deviceId = DeviceId.fromString(dId);
-         deviceService.unassignDeviceFromGroup(deviceId);
+        //下面这个方法的第二个参数GroupId需要从物管理获取
+        deviceService.unassignDeviceFromGroup(deviceId , new GroupId(UUID.fromString("f12bacb0-f5b0-11e7-acf4-1d442845aa21")));
         Device device = deviceService.findDeviceById(deviceId);
         return device;
     }

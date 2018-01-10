@@ -67,16 +67,6 @@ public class CassandraDeviceDao extends CassandraAbstractSearchTextDao<DeviceEnt
     }
 
     @Override
-    public List<Device> findDevicesByGroupId(UUID groupId, TextPageLink pageLink) {
-        log.debug("Try to find devices by groupId [{}] and pageLink [{}]", groupId, pageLink);
-        List<DeviceEntity> deviceEntities = findPageWithTextSearch(DEVICE_COLUMN_FAMILY_NAME,
-                Collections.singletonList(eq(DEVICE_GROUP_PROPERTY, groupId)), pageLink);
-
-        log.trace("Found devices [{}] by groupId [{}] and pageLink [{}]", deviceEntities, groupId, pageLink);
-        return DaoUtil.convertDataList(deviceEntities);
-    }
-
-    @Override
     public List<Device> findDevicesByTenantId(UUID tenantId, TextPageLink pageLink) {
         log.debug("Try to find devices by tenantId [{}] and pageLink [{}]", tenantId, pageLink);
         List<DeviceEntity> deviceEntities = findPageWithTextSearch(DEVICE_BY_TENANT_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME,
