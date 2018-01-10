@@ -91,7 +91,7 @@ public class GroupController extends BaseController{
     }
 
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/device/{deviceId}/group/{groupId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/assign/{deviceId}/{groupId}", method = RequestMethod.GET)
     @ResponseBody
     public Device assignDeviceToGroup(@PathVariable("deviceId") String dId,@PathVariable("groupId") String gId) throws Exception {
         DeviceId deviceId = DeviceId.fromString(dId);
@@ -101,12 +101,12 @@ public class GroupController extends BaseController{
     }
 
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/unassign/{deviceId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/unassign/{deviceId}/{groupId}", method = RequestMethod.GET)
     @ResponseBody
-    public Device unAssignDeviceFromGroup(@PathVariable("deviceId") String dId) throws Exception {
+    public Device unAssignDeviceFromGroup(@PathVariable("deviceId") String dId,@PathVariable("groupId") String gId) throws Exception {
         DeviceId deviceId = DeviceId.fromString(dId);
         //下面这个方法的第二个参数GroupId需要从物管理获取
-        deviceService.unassignDeviceFromGroup(deviceId , new GroupId(UUID.fromString("f12bacb0-f5b0-11e7-acf4-1d442845aa21")));
+        deviceService.unassignDeviceFromGroup(deviceId , new GroupId(UUID.fromString(gId)));
         Device device = deviceService.findDeviceById(deviceId);
         return device;
     }
