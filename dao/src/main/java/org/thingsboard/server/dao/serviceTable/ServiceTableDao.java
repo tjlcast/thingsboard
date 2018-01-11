@@ -18,6 +18,7 @@ package org.thingsboard.server.dao.serviceTable;
 import org.thingsboard.server.common.data.ServiceTable;
 import org.thingsboard.server.dao.Dao;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -39,4 +40,21 @@ public interface ServiceTableDao extends Dao<ServiceTable> {
      * @return found service
      */
     Optional<ServiceTable> findServiceTableByCoordinate(String coordinate);
+
+    /**
+     * Find service by manufacture.
+     *
+     * @param manufacture the manufacture
+     * @return found service
+     */
+    List<ServiceTable> findServiceTablesByManufacture(String manufacture);
+
+    /**
+     * Find service by manufacture and device type.
+     *
+     * @param manufacture the manufacture
+     * @param device_type the device type
+     * @return found service
+     */
+    List<ServiceTable> findServiceTablesByManufactureAndDeviceType(String manufacture, String device_type);
 }

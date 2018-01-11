@@ -51,8 +51,13 @@ public class ModelConstants {
     public static final String SERVICE_ID_PROPERTY = ID_PROPERTY;
     public static final String SERVICE_COORDINATE_PROPERTY = "coordinate";
     public static final String SERVICE_DESCRIPTION_PROPERTY = "description";
+    public static final String SERVICE_MANUFACTURE_PROPERTY = "manufacture";
+    public static final String SERVICE_DEVICE_TYPE_PROPERTY = "device_type";
+    public static final String SERVICE_MODEL_PROPERTY = "model";
+
 
     public static final String SERVICE_BY_COORDINATE_COLUMN_FAMILY_NAME = "service_by_coordinate";
+    public static final String SERVICE_BY_MANUFACTURE_COLUMN_FAMILY_NAME = "service_by_manufacture";
 
     /**
      * Cassandra user constants.

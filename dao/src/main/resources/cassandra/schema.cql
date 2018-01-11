@@ -227,6 +227,9 @@ CREATE TABLE IF NOT EXISTS thingsboard.service (
   id timeuuid,
   coordinate text,
   description text,
+  manufacture text,
+  device_type text,
+  model text,
   PRIMARY KEY (id, coordinate)
 );
 
@@ -236,6 +239,15 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.service_by_coordinate AS
     WHERE id IS NOT NULL AND coordinate IS NOT NULL
     PRIMARY KEY ( coordinate, id)
     WITH CLUSTERING ORDER BY ( coordinate ASC, id DESC );
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.service_by_manufacture AS
+    SELECT *
+    from thingsboard.service
+    WHERE id IS NOT NULL AND coordinate IS NOT NULL AND manufacture IS NOT NULL
+    PRIMARY KEY ( manufacture, coordinate, id)
+    WITH CLUSTERING ORDER BY ( manufacture ASC, coordinate ASC, id DESC );
+
+CREATE INDEX service_device_type ON service(device_type);
 
 CREATE TABLE IF NOT EXISTS thingsboard.device_by_group_id (
     device_id timeuuid,

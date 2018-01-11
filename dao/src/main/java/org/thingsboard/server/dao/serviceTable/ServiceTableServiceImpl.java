@@ -24,8 +24,10 @@ import org.thingsboard.server.common.data.id.ServiceTableId;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.service.DataValidator;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
 
@@ -50,6 +52,42 @@ public class ServiceTableServiceImpl implements ServiceTableService{
     public List<ServiceTable> findServiceTables() {
         log.trace("Executing findServiceTables");
         return serviceTableDao.find();
+    }
+
+    @Override
+    public Set<String> findAllManufactures(){
+        log.trace("Executing findAllManufactures");
+        List<ServiceTable> serviceTables = serviceTableDao.find();
+        Set<String> manufactures = new HashSet<>();
+        for(ServiceTable serviceTable : serviceTables){
+            manufactures.add(serviceTable.getManufacture());
+        }
+        log.trace("found Manufactures [{}]", manufactures);
+        return manufactures;
+    }
+
+    @Override
+    public Set<String> findDeviceTypesByManufacture(String manufacture){
+        log.trace("Executing findDeviceTypesByManufacture");
+        List<ServiceTable> serviceTables = serviceTableDao.findServiceTablesByManufacture(manufacture);
+        Set<String> deviceTypes = new HashSet<>();
+        for(ServiceTable serviceTable : serviceTables){
+            deviceTypes.add(serviceTable.getDevice_type());
+        }
+        log.trace("found DeviceTypes [{}]", deviceTypes);
+        return deviceTypes;
+    }
+
+    @Override
+    public Set<String> findModelsByManufactureAndDeviceType(String manufacture, String device_type){
+        log.trace("Executing findModelsByManufactureAndDeviceType");
+        List<ServiceTable> serviceTables = serviceTableDao.findServiceTablesByManufactureAndDeviceType(manufacture,device_type);
+        Set<String> models = new HashSet<>();
+        for(ServiceTable serviceTable : serviceTables){
+            models.add(serviceTable.getModel());
+        }
+        log.trace("found Models [{}]", models);
+        return models;
     }
 
     @Override

@@ -47,6 +47,15 @@ public final class ServiceTableEntity implements BaseEntity<ServiceTable>{
     @Column(name = SERVICE_DESCRIPTION_PROPERTY)
     private String description;
 
+    @Column(name = SERVICE_MANUFACTURE_PROPERTY)
+    private String manufacture;
+
+    @Column(name = SERVICE_DEVICE_TYPE_PROPERTY)
+    private String device_type;
+
+    @Column(name = SERVICE_MODEL_PROPERTY)
+    private String model;
+
     public ServiceTableEntity() {
         super();
     }
@@ -57,6 +66,9 @@ public final class ServiceTableEntity implements BaseEntity<ServiceTable>{
         }
         this.coordinate = serviceTable.getCoordinate();
         this.description = serviceTable.getDescription();
+        this.manufacture = serviceTable.getManufacture();
+        this.device_type = serviceTable.getDevice_type();
+        this.model = serviceTable.getModel();
     }
 
     @Override
@@ -85,12 +97,39 @@ public final class ServiceTableEntity implements BaseEntity<ServiceTable>{
         this.description = description;
     }
 
+    public String getManufacture() {
+        return manufacture;
+    }
+
+    public void setManufacture(String manufacture) {
+        this.manufacture = manufacture;
+    }
+
+    public String getDevice_type() {
+        return device_type;
+    }
+
+    public void setDevice_type(String device_type) {
+        this.device_type = device_type;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
     @Override
     public ServiceTable toData() {
         ServiceTable service = new ServiceTable(new ServiceTableId(id));
         service.setCreatedTime(UUIDs.unixTimestamp(id));
         service.setCoordinate(coordinate);
         service.setDescription(description);
+        service.setManufacture(manufacture);
+        service.setDevice_type(device_type);
+        service.setModel(model);
         return service;
     }
 }

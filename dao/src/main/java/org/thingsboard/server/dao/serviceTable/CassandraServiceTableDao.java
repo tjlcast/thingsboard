@@ -25,6 +25,7 @@ import org.thingsboard.server.dao.model.nosql.ServiceTableEntity;
 import org.thingsboard.server.dao.nosql.CassandraAbstractModelDao;
 import org.thingsboard.server.dao.util.NoSqlDao;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
@@ -55,4 +56,23 @@ public class CassandraServiceTableDao extends CassandraAbstractModelDao<ServiceT
         query.and(eq(SERVICE_COORDINATE_PROPERTY, coordinate));
         return Optional.ofNullable(DaoUtil.getData(findOneByStatement(query)));
     }
+
+    @Override
+    public List<ServiceTable> findServiceTablesByManufacture(String manufacture){
+        Select select = select().from(SERVICE_BY_MANUFACTURE_COLUMN_FAMILY_NAME);
+        Select.Where query = select.where();
+        query.and(eq(SERVICE_MANUFACTURE_PROPERTY, manufacture));
+        return DaoUtil.convertDataList(findListByStatement(query));
+    }
+
+    @Override
+    public List<ServiceTable> findServiceTablesByManufactureAndDeviceType(String manufacture, String device_type){
+        Select select = select().from(SERVICE_BY_MANUFACTURE_COLUMN_FAMILY_NAME);
+        select.allowFiltering();
+        Select.Where query = select.where();
+        query.and(eq(SERVICE_MANUFACTURE_PROPERTY, manufacture));
+        query.and(eq(SERVICE_DEVICE_TYPE_PROPERTY, device_type));
+        return DaoUtil.convertDataList(findListByStatement(query));
+    }
+
 }
