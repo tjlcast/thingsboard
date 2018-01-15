@@ -85,6 +85,12 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     }
 
     @Override
+    public List<Device> findDevicesByParentDeviceId(String parentDeviceId, TextPageLink pageLink){
+        List<Device> list = new ArrayList<>();
+        return list;
+    }
+
+    @Override
     public ListenableFuture<List<Device>> findDevicesByTenantIdCustomerIdAndIdsAsync(UUID tenantId, UUID customerId, List<UUID> deviceIds) {
         return service.submit(() -> DaoUtil.convertDataList(
                 deviceRepository.findDevicesByTenantIdAndCustomerIdAndIdIn(fromTimeUUID(tenantId), fromTimeUUID(customerId), fromTimeUUIDs(deviceIds))));

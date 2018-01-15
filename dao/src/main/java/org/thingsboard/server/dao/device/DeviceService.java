@@ -73,4 +73,6 @@ public interface DeviceService {
 
     ListenableFuture<List<EntitySubtype>> findDeviceTypesByTenantId(TenantId tenantId);
 
+    List<Device> findDeviceByParentDeviceId(String parentDeviceId, TextPageLink pageLink);
+
 }

@@ -114,6 +114,13 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         deviceByGroupIdDao.deleteAllByGroupId(groupId.getId());
     }
 
+    //******根据parentDeviceId寻找设备******
+    @Override
+    public List<Device> findDeviceByParentDeviceId(String parentDeviceId, TextPageLink pageLink) {
+        log.trace("Executing findDeviceByParentDeviceId [{}]",parentDeviceId);
+        return deviceDao.findDevicesByParentDeviceId(parentDeviceId,pageLink);
+    }
+
     @Override
     public Device findDeviceById(DeviceId deviceId) {
         log.trace("Executing findDeviceById [{}]", deviceId);
