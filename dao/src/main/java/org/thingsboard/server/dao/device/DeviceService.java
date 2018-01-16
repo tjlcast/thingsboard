@@ -59,7 +59,7 @@ public interface DeviceService {
 
     void unassignDevicesByGroupId(GroupId groupId);
 
-    void unassignDeviceFromGroup(DeviceId deviceId);
+    void unassignDeviceFromGroup(DeviceId deviceId, GroupId groupId);
 
     TextPageData<Device> findDevicesByTenantIdAndCustomerId(TenantId tenantId, CustomerId customerId, TextPageLink pageLink);
 
@@ -72,5 +72,7 @@ public interface DeviceService {
     ListenableFuture<List<Device>> findDevicesByQuery(DeviceSearchQuery query);
 
     ListenableFuture<List<EntitySubtype>> findDeviceTypesByTenantId(TenantId tenantId);
+
+    List<Device> findDeviceByParentDeviceId(String parentDeviceId, TextPageLink pageLink);
 
 }

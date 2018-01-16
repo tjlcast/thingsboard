@@ -90,6 +90,7 @@ public class GatewaySessionCtx {
                 newDevice.setTenantId(gateway.getTenantId());
                 newDevice.setName(deviceName);
                 newDevice.setType(deviceType);
+                newDevice.setParentDeviceId(gateway.getId().getId().toString());
                 newDevice = deviceService.saveDevice(newDevice);
                 relationService.saveRelationAsync(new EntityRelation(gateway.getId(), newDevice.getId(), "Created"));
                 return newDevice;

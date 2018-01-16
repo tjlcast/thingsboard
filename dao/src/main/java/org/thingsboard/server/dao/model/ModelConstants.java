@@ -51,8 +51,13 @@ public class ModelConstants {
     public static final String SERVICE_ID_PROPERTY = ID_PROPERTY;
     public static final String SERVICE_COORDINATE_PROPERTY = "coordinate";
     public static final String SERVICE_DESCRIPTION_PROPERTY = "description";
+    public static final String SERVICE_MANUFACTURE_PROPERTY = "manufacture";
+    public static final String SERVICE_DEVICE_TYPE_PROPERTY = "device_type";
+    public static final String SERVICE_MODEL_PROPERTY = "model";
+
 
     public static final String SERVICE_BY_COORDINATE_COLUMN_FAMILY_NAME = "service_by_coordinate";
+    public static final String SERVICE_BY_MANUFACTURE_COLUMN_FAMILY_NAME = "service_by_manufacture";
 
     /**
      * Cassandra user constants.
@@ -144,6 +149,7 @@ public class ModelConstants {
     public static final String DEVICE_STATUS_PROPERTY = "status";
     public static final String DEVICE_ADDITIONAL_INFO_PROPERTY = ADDITIONAL_INFO_PROPERTY;
 
+    public static final String DEVICE_BY_TENANT_AND_PARENT_DEVICE_ID_COLUMN_FAMILY_NAME = "device_by_tenant_and_parent_device_id";
     public static final String DEVICE_BY_GROUP_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "device_by_group_and_search_text";
     public static final String DEVICE_BY_TENANT_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "device_by_tenant_and_search_text";
     public static final String DEVICE_BY_TENANT_BY_TYPE_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "device_by_tenant_by_type_and_search_text";
@@ -164,6 +170,14 @@ public class ModelConstants {
     public static final String GROUP_BY_CUSTOMER_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "group_by_customer_and_search_text";
     public static final String GROUP_BY_CUSTOMER_AND_NAME_COLUMN_FAMILY_NAME = "group_by_customer_and_name";
 
+    /**
+     * Cassandra deviceByGroupId constants.
+     */
+    public static final String DEVICE_BY_GROUP_ID_COLUMN_FAMILY_NAME = "device_by_group_id";
+    public static final String DEVICE_BY_GROUP_ID_DEVICE_ID_PROPERTY = "device_id";
+    public static final String DEVICE_BY_GROUP_ID_GROUP_ID_PROPERTY = "group_id";
+
+    public static final String GROUP_BY_DEVICE_ID_COLUMN_FAMILY_NAME = "group_by_device_id";
     /**
      * Cassandra asset constants.
      */

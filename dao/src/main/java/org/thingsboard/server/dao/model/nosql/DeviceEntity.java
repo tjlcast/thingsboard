@@ -55,9 +55,6 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
     @Column(name = DEVICE_TYPE_PROPERTY)
     private String type;
 
-    @Column(name = DEVICE_GROUP_PROPERTY)
-    private UUID groupId;
-
     @Column(name = DEVICE_NAME_PROPERTY)
     private String name;
 
@@ -99,12 +96,6 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         if (device.getCustomerId() != null) {
             this.customerId = device.getCustomerId().getId();
         }
-        if (device.getGroupId()!= null){
-            this.groupId = device.getGroupId().getId();
-        }
-        else{
-            this.groupId = device.getTenantId().getId();
-        }
         this.name = device.getName();
         this.type = device.getType();
         this.additionalInfo = device.getAdditionalInfo();
@@ -138,14 +129,6 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
 
     public void setCustomerId(UUID customerId) {
         this.customerId = customerId;
-    }
-
-    public UUID getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(UUID groupId) {
-        this.groupId = groupId;
     }
 
     public String getName() {
@@ -243,9 +226,6 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         }
         if (customerId != null) {
             device.setCustomerId(new CustomerId(customerId));
-        }
-        if (groupId != null) {
-            device.setGroupId(new GroupId(groupId));
         }
         device.setName(name);
         device.setType(type);

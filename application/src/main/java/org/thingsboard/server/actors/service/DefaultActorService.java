@@ -30,6 +30,7 @@ import org.thingsboard.server.actors.rpc.RpcSessionCreateRequestMsg;
 import org.thingsboard.server.actors.rpc.RpcSessionTellMsg;
 import org.thingsboard.server.actors.session.SessionManagerActor;
 import org.thingsboard.server.actors.stats.StatsActor;
+import org.thingsboard.server.actors.tenant.ServiceGroupUpdateMsg;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.PluginId;
 import org.thingsboard.server.common.data.id.RuleId;
@@ -198,6 +199,11 @@ public class DefaultActorService implements ActorService {
     //TODO 不太合理
     @Override
     public void onMsg(DeviceRecognitionMsg msg) {
+        log.trace("Processing broadcast rpc msg: {}", msg);
+        appActor.tell(msg, ActorRef.noSender());
+    }
+
+    public void onMsg(ServiceGroupUpdateMsg msg) {
         log.trace("Processing broadcast rpc msg: {}", msg);
         appActor.tell(msg, ActorRef.noSender());
     }

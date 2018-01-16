@@ -49,15 +49,6 @@ public interface DeviceDao extends Dao<Device> {
     List<Device> findDevicesByTenantId(UUID tenantId, TextPageLink pageLink);
 
     /**
-     * Find devices by groupId and page link.
-     *
-     * @param groupId the tenantId
-     * @param pageLink the page link
-     * @return the list of device objects
-     */
-    List<Device> findDevicesByGroupId(UUID groupId, TextPageLink pageLink);
-
-    /**
      * Find devices by tenantId, type and page link.
      *
      * @param tenantId the tenantId
@@ -123,4 +114,6 @@ public interface DeviceDao extends Dao<Device> {
      * @return the list of tenant device type objects
      */
     ListenableFuture<List<EntitySubtype>> findTenantDeviceTypesAsync(UUID tenantId);
+
+    List<Device> findDevicesByParentDeviceId(String parentDeviceId, TextPageLink pageLink);
 }

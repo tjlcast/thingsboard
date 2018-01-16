@@ -155,7 +155,6 @@ CREATE TABLE IF NOT EXISTS thingsboard.device (
     id timeuuid,
     tenant_id timeuuid,
     customer_id timeuuid,
-    group_id timeuuid,
     name text,
     type text,
     search_text text,
@@ -168,7 +167,6 @@ CREATE TABLE IF NOT EXISTS thingsboard.device (
     additional_info text,
     PRIMARY KEY (id, tenant_id, customer_id, type)
 );
-CREATE INDEX group_index ON thingsboard.device (group_id);
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.device_by_tenant_and_name AS
     SELECT *
@@ -229,15 +227,40 @@ CREATE TABLE IF NOT EXISTS thingsboard.service (
   id timeuuid,
   coordinate text,
   description text,
+  manufacture text,
+  device_type text,
+  model text,
   PRIMARY KEY (id, coordinate)
 );
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.service_by_coordinate AS
-  SELECT *
-  from thingsboard.service
-  WHERE id IS NOT NULL AND coordinate IS NOT NULL
-  PRIMARY KEY ( coordinate, id)
-  WITH CLUSTERING ORDER BY ( coordinate ASC, id DESC );
+    SELECT *
+    from thingsboard.service
+    WHERE id IS NOT NULL AND coordinate IS NOT NULL
+    PRIMARY KEY ( coordinate, id)
+    WITH CLUSTERING ORDER BY ( coordinate ASC, id DESC );
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.service_by_manufacture AS
+    SELECT *
+    from thingsboard.service
+    WHERE id IS NOT NULL AND coordinate IS NOT NULL AND manufacture IS NOT NULL
+    PRIMARY KEY ( manufacture, coordinate, id)
+    WITH CLUSTERING ORDER BY ( manufacture ASC, coordinate ASC, id DESC );
+
+CREATE INDEX service_device_type ON service(device_type);
+
+CREATE TABLE IF NOT EXISTS thingsboard.device_by_group_id (
+    device_id timeuuid,
+    group_id timeuuid,
+    PRIMARY KEY (group_id, device_id)
+);
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.group_by_device_id AS
+    SELECT *
+    from thingsboard.device_by_group_id
+    WHERE group_id IS NOT NULL AND device_id IS NOT NULL
+    PRIMARY KEY ( device_id, group_id)
+    WITH CLUSTERING ORDER BY ( device_id ASC, group DESC );
 
 CREATE TABLE IF NOT EXISTS thingsboard.group (
     id timeuuid,

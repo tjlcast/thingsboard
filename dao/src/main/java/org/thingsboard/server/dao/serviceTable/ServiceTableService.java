@@ -21,6 +21,7 @@ import org.thingsboard.server.common.data.id.ServiceTableId;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Created by CZX on 2017/12/25.
@@ -34,4 +35,10 @@ public interface ServiceTableService {
     Optional<ServiceTable> findServiceTableByCoordinate(String coordinate);
 
     void deleteServiceTable(ServiceTableId serviceTableId);
+
+    Set<String> findAllManufactures();
+
+    Set<String> findDeviceTypesByManufacture(String manufacture);
+
+    Set<String> findModelsByManufactureAndDeviceType(String manufacture, String device_type);
 }

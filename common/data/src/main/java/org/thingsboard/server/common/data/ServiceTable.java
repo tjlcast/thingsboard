@@ -28,6 +28,9 @@ public class ServiceTable extends BaseData<ServiceTableId> {
 
     private String coordinate;
     private String description;
+    private String manufacture;
+    private String device_type;
+    private String model;
 
     public ServiceTable() {
         super();
@@ -41,6 +44,9 @@ public class ServiceTable extends BaseData<ServiceTableId> {
         super(serviceTable);
         this.coordinate = serviceTable.getCoordinate();
         this.description = serviceTable.getDescription();
+        this.manufacture = serviceTable.getManufacture();
+        this.device_type = serviceTable.getDevice_type();
+        this.model = serviceTable.getModel();
     }
 
     public String getCoordinate() {
@@ -59,11 +65,38 @@ public class ServiceTable extends BaseData<ServiceTableId> {
         this.description = description;
     }
 
+    public String getManufacture() {
+        return manufacture;
+    }
+
+    public void setManufacture(String manufacture) {
+        this.manufacture = manufacture;
+    }
+
+    public String getDevice_type() {
+        return device_type;
+    }
+
+    public void setDevice_type(String device_type) {
+        this.device_type = device_type;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
     @Override
     public String toString() {
         return "ServiceTable{" +
                 "coordinate='" + coordinate + '\'' +
                 ", description='" + description + '\'' +
+                ", manufacture='" + manufacture + '\'' +
+                ", device_type='" + device_type + '\'' +
+                ", model='" + model + '\'' +
                 '}';
     }
 }
