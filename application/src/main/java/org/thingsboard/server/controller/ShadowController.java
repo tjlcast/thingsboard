@@ -90,7 +90,7 @@ public class ShadowController {
         return result;
     }
 
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
+  //  @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/{deviceId}/{scheduleType}/**", method = RequestMethod.POST)
     public DeferredResult<String> shadow2schedule(@RequestBody String json1,@PathVariable String deviceId,
                                                   @PathVariable String scheduleType,  HttpServletRequest request){
@@ -119,14 +119,15 @@ public class ShadowController {
         return result;
     }
 
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/cancel/{deviceId}/{taskId}", method = RequestMethod.POST)
+  //  @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
+    @RequestMapping(value = "/cancel/{deviceId}/{taskId}", method = RequestMethod.GET)
     public String cancelTask(@PathVariable String deviceId,@PathVariable String taskId) {
         Map<UUID,TaskBean> map = taskMap.get(deviceId);
         if(map!=null){
             TaskBean bean = map.get(UUID.fromString(taskId));
             if(bean!=null&&!bean.isCancel()){
                 bean.getFuture().cancel(true);
+                bean.setCancel(true);
                 return "cancel success";
             }else{
                 return "has bean canceled";
@@ -136,8 +137,8 @@ public class ShadowController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/list/{deviceId}", method = RequestMethod.POST)
+  //  @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
+    @RequestMapping(value = "/list/{deviceId}", method = RequestMethod.GET)
     public String listTask(@PathVariable String deviceId) {
 
         Map<UUID,TaskBean> map = taskMap.get(deviceId);
@@ -148,7 +149,8 @@ public class ShadowController {
         for(Map.Entry<UUID,TaskBean> entry:map.entrySet()){
             JsonObject obj = new JsonObject();
             obj.addProperty("id",entry.getKey().toString());
-            obj.addProperty("id",entry.getValue().getDescription());
+            obj.addProperty("description",entry.getValue().getDescription());
+            obj.addProperty("iscanceled",entry.getValue().isCancel());
             res.add(obj);
         }
         return res.toString();
@@ -157,24 +159,26 @@ public class ShadowController {
     private void helper(DeviceShadowMsg msg,String scheduleType,String[] paths){
         UUID id = UUID.randomUUID();
         DeviceId deviceId = msg.getDeviceId();
-        if(!taskMap.containsKey(deviceId)){
+        if(!taskMap.containsKey(deviceId.toString())){
             taskMap.put(deviceId.toString(),new HashMap<>());
         }
         if(scheduleType.equals("delay")){
             String des = "这是一个下达于 "+new Date().toString()+" 的延时任务，任务指定 "+new Date(System.currentTimeMillis()+Long.parseLong(paths[0])*1000l).toString()+" 开始执行";
             java.util.concurrent.Future future= scheduleOnce(()->{
-                actorService.onMsg(msg);
-                msg.setResult("task submit ok");
+//                actorService.onMsg(msg);
+                System.err.println("delay task start");
             } ,Long.parseLong(paths[0]),TimeUnit.SECONDS);
             taskMap.get(deviceId.toString()).put(id,new TaskBean(future,id,des,false));
+            msg.setResult("task submit ok");
         }else if(scheduleType.equals("period")){
-            String des = "这是一个下达于 "+new Date().toString()+" 的延时任务，任务指定 "+new Date(System.currentTimeMillis()+Long.parseLong(paths[0])*1000l).toString()+
+            String des = "这是一个下达于 "+new Date().toString()+" 的周期任务，任务指定 "+new Date(System.currentTimeMillis()+Long.parseLong(paths[0])*1000l).toString()+
                     " 开始执行，并在只有以 " + paths[1] + "秒为周期执行";
             java.util.concurrent.Future future = schedule(()->{
-                actorService.onMsg(msg);
-                msg.setResult("task submit ok");
+//                actorService.onMsg(msg);
+                System.err.println("period task start");
             },Long.parseLong(paths[0]),Long.parseLong(paths[1]), TimeUnit.SECONDS);
             taskMap.get(deviceId.toString()).put(id,new TaskBean(future,id,des,false));
+             msg.setResult("task submit ok");
         }
     }
 
