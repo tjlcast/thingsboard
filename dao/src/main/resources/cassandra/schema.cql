@@ -168,6 +168,13 @@ CREATE TABLE IF NOT EXISTS thingsboard.device (
     PRIMARY KEY (id, tenant_id, customer_id, type)
 );
 
+CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.device_by_tenant_and_parent_device_id AS
+    SELECT *
+    from thingsboard.device
+    WHERE tenant_id IS NOT NULL AND customer_id IS NOT NULL AND type IS NOT NULL AND parent_device_id IS NOT NULL AND id IS NOT NULL
+    PRIMARY KEY ( parent_device_id, tenant_id, id, customer_id,type)
+    WITH CLUSTERING ORDER BY ( parent_device_id ASC, id DESC, customer_id DESC);
+
 CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.device_by_tenant_and_name AS
     SELECT *
     from thingsboard.device
@@ -247,7 +254,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS thingsboard.service_by_manufacture AS
     PRIMARY KEY ( manufacture, coordinate, id)
     WITH CLUSTERING ORDER BY ( manufacture ASC, coordinate ASC, id DESC );
 
-CREATE INDEX service_device_type ON service(device_type);
+CREATE INDEX service_device_type ON thingsboard.service(device_type);
 
 CREATE TABLE IF NOT EXISTS thingsboard.device_by_group_id (
     device_id timeuuid,
