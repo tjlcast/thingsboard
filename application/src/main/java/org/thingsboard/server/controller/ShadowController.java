@@ -90,12 +90,12 @@ public class ShadowController {
         return result;
     }
 
-  //  @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/{deviceId}/{scheduleType}/**", method = RequestMethod.POST)
     public DeferredResult<String> shadow2schedule(@RequestBody String json1,@PathVariable String deviceId,
                                                   @PathVariable String scheduleType,  HttpServletRequest request){
-   //    String json = URLDecoder.decode(json1);
-        String json = json1;
+       String json = URLDecoder.decode(json1);
+     //   String json = json1;
         DeferredResult<String> result = new DeferredResult<>();
         JsonParser parser = new JsonParser();
         Device device = deviceService.findDeviceById(DeviceId.fromString(deviceId));
@@ -119,7 +119,7 @@ public class ShadowController {
         return result;
     }
 
-  //  @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/cancel/{deviceId}/{taskId}", method = RequestMethod.GET)
     public String cancelTask(@PathVariable String deviceId,@PathVariable String taskId) {
         Map<UUID,TaskBean> map = taskMap.get(deviceId);
@@ -137,7 +137,7 @@ public class ShadowController {
         }
     }
 
-  //  @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/list/{deviceId}", method = RequestMethod.GET)
     public String listTask(@PathVariable String deviceId) {
 
@@ -163,20 +163,32 @@ public class ShadowController {
             taskMap.put(deviceId.toString(),new HashMap<>());
         }
         if(scheduleType.equals("delay")){
-            String des = "这是一个下达于 "+new Date().toString()+" 的延时任务，任务指定 "+new Date(System.currentTimeMillis()+Long.parseLong(paths[0])*1000l).toString()+" 开始执行";
+            String des = "这是一个下达于 "+new Date().toString()+" 的延时任务，任务指定 "+new Date(Long.parseLong(paths[0])).toString()+" 开始执行";
+            long a = Long.parseLong(paths[0])-System.currentTimeMillis();
             java.util.concurrent.Future future= scheduleOnce(()->{
-//                actorService.onMsg(msg);
-                System.err.println("delay task start");
-            } ,Long.parseLong(paths[0]),TimeUnit.SECONDS);
+               actorService.onMsg(msg);
+  //              System.err.println("delay task start");
+            } ,Long.parseLong(paths[0])-System.currentTimeMillis(),TimeUnit.MILLISECONDS  );
             taskMap.get(deviceId.toString()).put(id,new TaskBean(future,id,des,false));
             msg.setResult("task submit ok");
         }else if(scheduleType.equals("period")){
-            String des = "这是一个下达于 "+new Date().toString()+" 的周期任务，任务指定 "+new Date(System.currentTimeMillis()+Long.parseLong(paths[0])*1000l).toString()+
-                    " 开始执行，并在只有以 " + paths[1] + "秒为周期执行";
+            String unit = msg.getPayLoad().get("requestBody").getAsJsonObject().get("unit").getAsString();
+            String des = "这是一个下达于 "+new Date().toString()+" 的周期任务，任务指定 "+new Date(Long.parseLong(paths[0])).toString()+
+                    " 开始执行，并以 " + paths[1] + " "+unit+"为周期执行";
+            msg.getPayLoad().get("requestBody").getAsJsonObject().remove("unit");
+            long a = 1;
+            if("second".equals(unit)){
+                a = 1;
+            }else if("hour".equals(unit)){
+                a = 60*60;
+            }else if("day".equals(unit)){
+                a = 60*60*24;
+            }else if("week".equals(unit))
+                a = 60*60*24*7;
             java.util.concurrent.Future future = schedule(()->{
-//                actorService.onMsg(msg);
-                System.err.println("period task start");
-            },Long.parseLong(paths[0]),Long.parseLong(paths[1]), TimeUnit.SECONDS);
+                actorService.onMsg(msg);
+  //              System.err.println("period task start");
+            },Long.parseLong(paths[0])-System.currentTimeMillis(),Long.parseLong(paths[1])*a*1000 , TimeUnit.MILLISECONDS  );
             taskMap.get(deviceId.toString()).put(id,new TaskBean(future,id,des,false));
              msg.setResult("task submit ok");
         }
