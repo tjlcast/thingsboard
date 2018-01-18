@@ -69,7 +69,7 @@ public class DeviceShadow {
         this.device = device;
 
         JsonObject pay = new JsonObject();
-        pay.add("attrubutes",new JsonArray());
+        pay.add("attributes",new JsonArray());
         pay.add("services",new JsonArray());
 //        for(JsonElement json:payload.getAsJsonArray("attributes")){
 //            attributes.put(((JsonObject)json).get("attributeName").getAsString(),(JsonObject) json);

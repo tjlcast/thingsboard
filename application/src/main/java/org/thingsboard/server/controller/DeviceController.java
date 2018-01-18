@@ -218,6 +218,31 @@ public class DeviceController extends BaseController {
     }
 
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
+    @RequestMapping(value = "/{parentDeviceId}/devices", params = {"limit"}, method = RequestMethod.GET)
+    @ResponseBody
+    public List<Device> getDevicesByParentDeviceId(
+            @PathVariable("parentDeviceId") String parentDeviceId,
+            @RequestParam int limit,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String idOffset,
+            @RequestParam(required = false) String textOffset) throws ThingsboardException {
+        checkParameter("customerId", parentDeviceId);
+        try {
+            TenantId tenantId = getCurrentUser().getTenantId();
+          //  DeviceId id = DeviceId.fromString(parentDeviceId)
+            TextPageLink pageLink = createPageLink(limit, textSearch, idOffset, textOffset);
+            if (type != null && type.trim().length() > 0) {
+                return checkNotNull(deviceService.findDeviceByParentDeviceId(parentDeviceId,pageLink));
+            } else {
+                return checkNotNull(deviceService.findDeviceByParentDeviceId(parentDeviceId,pageLink));
+            }
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/customer/{customerId}/devices", params = {"limit"}, method = RequestMethod.GET)
     @ResponseBody
     public TextPageData<Device> getCustomerDevices(

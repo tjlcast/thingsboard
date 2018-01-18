@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.thingsboard.server.common.data.id.RuleId;
@@ -32,6 +33,11 @@ import org.thingsboard.server.extensions.api.rules.RuleException;
 import org.thingsboard.server.extensions.rest.action.RestApiCallActionMsg;
 import org.thingsboard.server.extensions.rest.action.RestApiCallActionPayload;
 
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+
 @RequiredArgsConstructor
 public class RestApiCallMsgHandler implements RuleMsgHandler {
 
@@ -44,11 +50,14 @@ public class RestApiCallMsgHandler implements RuleMsgHandler {
             throw new RuleException("Unsupported message type " + msg.getClass().getName() + "!");
         }
         RestApiCallActionPayload payload = ((RestApiCallActionMsg)msg).getPayload();
+        List<String> ls = new ArrayList<String>();
+        ls.add("Bearer "+HttpUtil.getAccessToken());
+        headers.put("X-Authorization",ls);
         try {
             ResponseEntity<String> exchangeResponse = new RestTemplate().exchange(
                     baseUrl + payload.getActionPath(),
                     payload.getHttpMethod(),
-                    new HttpEntity<>(payload.getMsgBody(), headers),
+                    new HttpEntity<>(URLEncoder.encode(payload.getMsgBody()), headers),
                     String.class);
             if (exchangeResponse.getStatusCode().equals(payload.getExpectedResultCode()) && payload.isSync()) {
                 ctx.reply(new ResponsePluginToRuleMsg(msg.getUid(), tenantId, ruleId,

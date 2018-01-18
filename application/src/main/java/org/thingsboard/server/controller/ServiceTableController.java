@@ -50,6 +50,28 @@ public class ServiceTableController extends BaseController{
     ActorService actorService;
 
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+    @RequestMapping(value = "/servicetable/manufatures", method = RequestMethod.GET)
+    @ResponseBody
+    public String manufatures() throws ThingsboardException {
+        return serviceTableService.findAllManufactures().toString();
+    }
+
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+    @RequestMapping(value = "/servicetable/{manufature}/deviceTypes", method = RequestMethod.GET)
+    @ResponseBody
+    public String deviceTypes(@PathVariable String manufature ) throws ThingsboardException {
+        return serviceTableService.findDeviceTypesByManufacture(manufature).toString();
+    }
+
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+    @RequestMapping(value = "/servicetable/{manufature}/{deviceType}/models", method = RequestMethod.GET)
+    @ResponseBody
+    public String models(@PathVariable String manufature , @PathVariable String deviceType) throws ThingsboardException {
+        return serviceTableService.findModelsByManufactureAndDeviceType(manufature,deviceType).toString();
+    }
+
+
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/servicetable/saveServiceGroup", method = RequestMethod.POST)
     @ResponseBody
     public ServiceTable save(@RequestBody  String json) throws ThingsboardException {
@@ -70,6 +92,9 @@ public class ServiceTableController extends BaseController{
         serviceTable1.orElse(serviceTable).setCoordinate(coordinate);
         serviceTable1.orElse(serviceTable).setDescription(des.toString());
         serviceTable1.orElse(serviceTable).setCreatedTime(System.currentTimeMillis());
+        serviceTable1.orElse(serviceTable).setManufacture(service.get("manufacture").getAsString());
+        serviceTable1.orElse(serviceTable).setDevice_type(service.get("deviceType").getAsString());
+        serviceTable1.orElse(serviceTable).setModel(service.get("model").getAsString());
        // serviceTable.setId(Ser);
         return serviceTableService.saveServiceTable(serviceTable1.orElse(serviceTable));
     }

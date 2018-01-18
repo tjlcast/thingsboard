@@ -321,7 +321,7 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
                     tele.addProperty("telemetryName",entry.getKey());
                     tele.addProperty("telemetryValue",entry.getValueAsString());
                     tele.addProperty("timeStamp",kv.getKey());
-                    deviceShadow.updateTelemetries(entry.getKey(),tele);
+ //                   deviceShadow.updateTelemetries(entry.getKey(),tele);
   //                  deviceShadow.addProperty(entry.getKey(),entry.getValueAsString());
                 }
             }
