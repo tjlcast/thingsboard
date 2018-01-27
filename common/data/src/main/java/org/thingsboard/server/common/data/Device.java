@@ -60,6 +60,10 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
         this.name = device.getName();
         this.type = device.getType();
         this.additionalInfo = device.getAdditionalInfo();
+        this.manufacture = device.getManufacture();
+        this.model = device.getModel();
+        this.parentDeviceId = device.getParentDeviceId();
+        this.deviceType = device.getDeviceType();
     }
 
     public TenantId getTenantId() {
@@ -136,13 +140,12 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
     @Override
     public String toString() {
         return "Device{" +
-                "id=" + id +
-                ", tenantId=" + tenantId +
+                "tenantId=" + tenantId +
                 ", customerId=" + customerId +
                 ", name='" + name + '\'' +
                 ", type='" + type + '\'' +
                 ", manufacture='" + manufacture + '\'' +
-                ", deviceType=" + deviceType + '\'' +
+                ", deviceType='" + deviceType + '\'' +
                 ", model='" + model + '\'' +
                 ", parentDeviceId='" + parentDeviceId + '\'' +
                 ", additionalInfo=" + additionalInfo +
