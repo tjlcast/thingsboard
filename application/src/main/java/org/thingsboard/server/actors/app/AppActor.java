@@ -37,6 +37,7 @@ import org.thingsboard.server.common.data.id.RuleId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageDataIterable;
 import org.thingsboard.server.common.msg.cluster.ClusterEventMsg;
+import org.thingsboard.server.common.msg.device.DeviceRecognitionMsg;
 import org.thingsboard.server.common.msg.device.ToDeviceActorMsg;
 import org.thingsboard.server.common.msg.plugin.ComponentLifecycleMsg;
 import org.thingsboard.server.dao.model.ModelConstants;
@@ -114,6 +115,8 @@ public class AppActor extends ContextAwareActor {
             onComponentLifecycleMsg((ComponentLifecycleMsg) msg);
         } else if (msg instanceof PluginTerminationMsg) {
             onPluginTerminated((PluginTerminationMsg) msg);
+        } else if (msg instanceof DeviceRecognitionMsg) {
+            getOrCreateTenantActor(((DeviceRecognitionMsg) msg).getTenantId()).tell(msg,ActorRef.noSender()) ;
         } else {
             logger.warning("Unknown message: {}!", msg);
         }

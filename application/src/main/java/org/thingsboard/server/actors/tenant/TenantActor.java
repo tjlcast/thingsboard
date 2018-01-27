@@ -36,6 +36,7 @@ import org.thingsboard.server.common.data.id.PluginId;
 import org.thingsboard.server.common.data.id.RuleId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.msg.cluster.ClusterEventMsg;
+import org.thingsboard.server.common.msg.device.DeviceRecognitionMsg;
 import org.thingsboard.server.common.msg.device.ToDeviceActorMsg;
 
 import akka.actor.ActorRef;
@@ -95,6 +96,8 @@ public class TenantActor extends ContextAwareActor {
             onComponentLifecycleMsg((ComponentLifecycleMsg) msg);
         } else if (msg instanceof PluginTerminationMsg) {
             onPluginTerminated((PluginTerminationMsg) msg);
+        } else if (msg instanceof DeviceRecognitionMsg) {
+            getOrCreateDeviceActor(((DeviceRecognitionMsg) msg).getDeviceId()).tell(msg, ActorRef.noSender());
         } else {
             logger.warning("[{}] Unknown message: {}!", tenantId, msg);
         }

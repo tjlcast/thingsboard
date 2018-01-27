@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.thingsboard.server.common.transport;
+package org.thingsboard.server.utils;
 
-import org.thingsboard.server.common.data.security.DeviceCredentialsFilter;
-import org.thingsboard.server.common.msg.aware.SessionAwareMsg;
-import org.thingsboard.server.common.msg.device.DeviceRecognitionMsg;
+import com.google.gson.JsonObject;
 
-public interface SessionMsgProcessor {
+/**
+ * Created by Administrator on 2017/12/10.
+ */
+public class HttpUtil {
 
-    public void onMsg(DeviceRecognitionMsg msg);
-
-    void process(SessionAwareMsg msg);
+    public static JsonObject getDeviceShadowDoc(String manufactory,String deviceType,String model){
+        return new JsonObject();
+    }
 
 }

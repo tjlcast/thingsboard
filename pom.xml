@@ -78,6 +78,7 @@
         <spring-test-dbunit.version>1.2.1</spring-test-dbunit.version>
         <postgresql.driver.version>9.4.1211</postgresql.driver.version>
         <sonar.exclusions>org/thingsboard/server/gen/**/*, org/thingsboard/server/extensions/core/plugin/telemetry/gen/**/*</sonar.exclusions>
+        <okhttp3.version>3.9.0</okhttp3.version>
     </properties>
 
     <modules>
@@ -316,6 +317,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp3.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.thingsboard</groupId>
                 <artifactId>extensions-api</artifactId>
