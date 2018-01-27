@@ -31,10 +31,19 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
     private CustomerId customerId;
     private String name;
     private String type;
-    private String manufacture;
-    private String model;
-    private String parentDeviceId;
+    private String manufacture;     // 厂商
+    private String deviceType;      // 设备型号
+    private String model;           // 设备
+    private String parentDeviceId;  // 父设备Id
     private transient JsonNode additionalInfo;
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
 
     public Device() {
         super();
@@ -133,6 +142,7 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
                 ", name='" + name + '\'' +
                 ", type='" + type + '\'' +
                 ", manufacture='" + manufacture + '\'' +
+                ", deviceType=" + deviceType + '\'' +
                 ", model='" + model + '\'' +
                 ", parentDeviceId='" + parentDeviceId + '\'' +
                 ", additionalInfo=" + additionalInfo +
