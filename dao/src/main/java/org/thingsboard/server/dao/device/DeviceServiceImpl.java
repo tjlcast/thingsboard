@@ -26,10 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.device.DeviceSearchQuery;
-import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.EntityId;
-import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.common.data.page.TextPageData;
 import org.thingsboard.server.common.data.page.TextPageLink;
 import org.thingsboard.server.common.data.relation.EntityRelation;
@@ -69,6 +66,9 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     private CustomerDao customerDao;
 
     @Autowired
+    private GroupDao groupDao;
+
+    @Autowired
     private DeviceCredentialsService deviceCredentialsService;
 
     @Override
@@ -101,6 +101,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     public Device saveDevice(Device device) {
         log.trace("Executing saveDevice [{}]", device);
         deviceValidator.validate(device);
+        //device.setGroupId(new GroupId(device.getCustomerId().getId()));
         Device savedDevice = deviceDao.save(device);
         if (device.getId() == null) {
             DeviceCredentials deviceCredentials = new DeviceCredentials();
@@ -109,8 +110,34 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
             deviceCredentials.setCredentialsId(RandomStringUtils.randomAlphanumeric(20));
             deviceCredentialsService.createDeviceCredentials(deviceCredentials);
         }
+        Group group = new Group(new GroupId(savedDevice.getUuidId()));
+        group.setTenantId(savedDevice.getTenantId());
+        group.setCustomerId(new CustomerId(savedDevice.getUuidId()));
+        group.setName("test group");
+        groupDao.save(group);
+        TextPageLink textPageLink = new TextPageLink(10);
+        List<Group> groups = groupDao.findGroupsByTenantId(savedDevice.getTenantId().getId(),textPageLink);
+        log.trace("Executing findGroupsByTenantId [{}]", groups);
+        //TextPageData<Device> devices = findDevicesByGroupId(new GroupId(savedDevice.getUuidId()),textPageLink);
+        List<Device> devices = deviceDao.findDevicesByTenantIdAndGroupId(savedDevice.getTenantId().getId(),savedDevice.getCustomerId().getId(),savedDevice.getUuidId(), textPageLink);
+        log.trace("Executing findDevicesByGroupId [{}]", devices);
         return savedDevice;
     }
+
+    @Override
+    public Device assignDeviceToGroup(DeviceId deviceId, UUID groupId) {
+        Device device = findDeviceById(deviceId);
+        device.setGroupId(groupId);
+        return saveDevice(device);
+    }
+
+    /*public TextPageData<Device> findDevicesByGroupId(TenantId tenantId, TextPageLink pageLink) {
+        log.trace("Executing findDevicesByTenantId, tenantId [{}], pageLink [{}]", tenantId, pageLink);
+        validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
+        validatePageLink(pageLink, INCORRECT_PAGE_LINK + pageLink);
+        List<Device> devices = deviceDao.findDevicesByTenantId(tenantId.getId(), pageLink);
+        return new TextPageData<>(devices, pageLink);
+    }*/
 
     @Override
     public Device assignDeviceToCustomer(DeviceId deviceId, CustomerId customerId) {
@@ -136,6 +163,15 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         }
         deleteEntityRelations(deviceId);
         deviceDao.removeById(deviceId.getId());
+    }
+
+    @Override
+    public TextPageData<Device> findDevicesByTenantIdAndGroupId(TenantId tenantId ,CustomerId customerId, GroupId groupId, TextPageLink pageLink) {
+        log.trace("Executing findDevicesByGroupId, tenantId [{}], pageLink [{}]", groupId, pageLink);
+        validateId(groupId, INCORRECT_TENANT_ID + groupId);
+        validatePageLink(pageLink, INCORRECT_PAGE_LINK + pageLink);
+        List<Device> devices = deviceDao.findDevicesByTenantIdAndGroupId(tenantId.getId(),customerId.getId(),groupId.getId(), pageLink);
+        return new TextPageData<>(devices, pageLink);
     }
 
     @Override
@@ -244,10 +280,10 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
         ListenableFuture<List<EntitySubtype>> tenantDeviceTypes = deviceDao.findTenantDeviceTypesAsync(tenantId.getId());
         return Futures.transform(tenantDeviceTypes,
-            (Function<List<EntitySubtype>, List<EntitySubtype>>) deviceTypes -> {
-                deviceTypes.sort(Comparator.comparing(EntitySubtype::getType));
-                return deviceTypes;
-        });
+                (Function<List<EntitySubtype>, List<EntitySubtype>>) deviceTypes -> {
+                    deviceTypes.sort(Comparator.comparing(EntitySubtype::getType));
+                    return deviceTypes;
+                });
     }
 
     private DataValidator<Device> deviceValidator =

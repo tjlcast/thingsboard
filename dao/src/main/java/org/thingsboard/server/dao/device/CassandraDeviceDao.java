@@ -40,6 +40,7 @@ import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static org.thingsboard.server.dao.model.ModelConstants.*;
+import static org.thingsboard.server.dao.model.ModelConstants.DEVICE_GROUP_PROPERTY;
 
 @Component
 @Slf4j
@@ -64,6 +65,17 @@ public class CassandraDeviceDao extends CassandraAbstractSearchTextDao<DeviceEnt
         Statement saveStatement = cluster.getMapper(EntitySubtypeEntity.class).saveQuery(entitySubtypeEntity);
         executeWrite(saveStatement);
         return savedDevice;
+    }
+
+    @Override
+    public List<Device> findDevicesByTenantIdAndGroupId(UUID tenantId ,UUID customerId,UUID groupId, TextPageLink pageLink) {
+        log.debug("Try to find devices by groupId [{}] and pageLink [{}]", groupId, pageLink);
+        List<DeviceEntity> deviceEntities = findPageWithTextSearch(DEVICE_COLUMN_FAMILY_NAME,
+                Arrays.asList(eq(DEVICE_GROUP_PROPERTY, groupId),eq(DEVICE_CUSTOMER_ID_PROPERTY, customerId),
+                        eq(DEVICE_TENANT_ID_PROPERTY, tenantId)), pageLink);
+
+        log.trace("Found devices [{}] by groupId [{}] and pageLink [{}]", deviceEntities, groupId, pageLink);
+        return DaoUtil.convertDataList(deviceEntities);
     }
 
     @Override

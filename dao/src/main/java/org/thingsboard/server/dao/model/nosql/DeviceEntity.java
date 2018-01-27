@@ -41,7 +41,7 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
     @PartitionKey(value = 0)
     @Column(name = ID_PROPERTY)
     private UUID id;
-    
+
     @PartitionKey(value = 1)
     @Column(name = DEVICE_TENANT_ID_PROPERTY)
     private UUID tenantId;
@@ -53,6 +53,10 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
     @PartitionKey(value = 3)
     @Column(name = DEVICE_TYPE_PROPERTY)
     private String type;
+
+    @PartitionKey(value = 4)
+    @Column(name = DEVICE_GROUP_PROPERTY)
+    private UUID groupId;
 
     @Column(name = DEVICE_NAME_PROPERTY)
     private String name;
@@ -71,7 +75,7 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
 
     @Column(name  = DEVICE_MODEL_PROPERTY )
     private String model;//设备型号
-    
+
     @Column(name = DEVICE_ADDITIONAL_INFO_PROPERTY, codec = JsonCodec.class)
     private JsonNode additionalInfo;
 
@@ -89,15 +93,21 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         if (device.getCustomerId() != null) {
             this.customerId = device.getCustomerId().getId();
         }
+        if (device.getGroupId()!= null){
+            this.groupId = device.getGroupId();
+        }
+        else{
+            this.groupId = device.getTenantId().getId();
+        }
         this.name = device.getName();
         this.type = device.getType();
         this.additionalInfo = device.getAdditionalInfo();
-        this.model = device.getModel();         //test
-        this.manufacture = device.getManufacture();
-        this.parentDeviceId = device.getParentDeviceId();
-        this.deviceType = device.getDeviceType();
+        this.model = "device.getModel()";         //test
+        this.manufacture = "device.getManufacture()";
+        this.parentDeviceId = "device.getParentDeviceId()";
+        this.deviceType = "device.getDeviceType()";
     }
-    
+
     public UUID getId() {
         return id;
     }
@@ -121,7 +131,15 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
     public void setCustomerId(UUID customerId) {
         this.customerId = customerId;
     }
-    
+
+    public UUID getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(UUID groupId) {
+        this.groupId = groupId;
+    }
+
     public String getName() {
         return name;
     }
@@ -177,7 +195,7 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
     public void setAdditionalInfo(JsonNode additionalInfo) {
         this.additionalInfo = additionalInfo;
     }
-    
+
     @Override
     public String getSearchTextSource() {
         return getName();
@@ -187,7 +205,7 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
     public void setSearchText(String searchText) {
         this.searchText = searchText;
     }
-    
+
     public String getSearchText() {
         return searchText;
     }
@@ -201,6 +219,9 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         }
         if (customerId != null) {
             device.setCustomerId(new CustomerId(customerId));
+        }
+        if (groupId != null) {
+            device.setGroupId(groupId);
         }
         device.setName(name);
         device.setType(type);

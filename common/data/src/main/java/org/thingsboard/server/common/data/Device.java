@@ -22,6 +22,8 @@ import org.thingsboard.server.common.data.id.TenantId;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.UUID;
+
 @EqualsAndHashCode(callSuper = true)
 public class Device extends SearchTextBased<DeviceId> implements HasName {
 
@@ -29,21 +31,14 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
 
     private TenantId tenantId;
     private CustomerId customerId;
+    private UUID groupId;
     private String name;
     private String type;
-    private String manufacture;     // 厂商
-    private String deviceType;      // 设备型号
-    private String model;           // 设备
-    private String parentDeviceId;  // 父设备Id
+    private String manufacture;     //厂商
+    private String deviceType;      //设备
+    private String model;           //型号
+    private String parentDeviceId;  //父设备id
     private transient JsonNode additionalInfo;
-
-    public String getDeviceType() {
-        return deviceType;
-    }
-
-    public void setDeviceType(String deviceType) {
-        this.deviceType = deviceType;
-    }
 
     public Device() {
         super();
@@ -57,6 +52,7 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
         super(device);
         this.tenantId = device.getTenantId();
         this.customerId = device.getCustomerId();
+        this.groupId = device.getGroupId();
         this.name = device.getName();
         this.type = device.getType();
         this.additionalInfo = device.getAdditionalInfo();
@@ -64,6 +60,15 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
         this.model = device.getModel();
         this.parentDeviceId = device.getParentDeviceId();
         this.deviceType = device.getDeviceType();
+    }
+
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 
     public TenantId getTenantId() {
@@ -80,6 +85,15 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
 
     public void setCustomerId(CustomerId customerId) {
         this.customerId = customerId;
+    }
+
+
+    public UUID getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(UUID groupId) {
+        this.groupId = groupId;
     }
 
     @Override
@@ -107,7 +121,6 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
         this.additionalInfo = additionalInfo;
     }
 
-
     public String getManufacture() {
         return manufacture;
     }
@@ -131,7 +144,7 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
     public void setParentDeviceId(String parentDeviceId) {
         this.parentDeviceId = parentDeviceId;
     }
-    
+
     @Override
     public String getSearchText() {
         return getName();
@@ -142,6 +155,7 @@ public class Device extends SearchTextBased<DeviceId> implements HasName {
         return "Device{" +
                 "tenantId=" + tenantId +
                 ", customerId=" + customerId +
+                ", groupId=" + groupId +
                 ", name='" + name + '\'' +
                 ", type='" + type + '\'' +
                 ", manufacture='" + manufacture + '\'' +
