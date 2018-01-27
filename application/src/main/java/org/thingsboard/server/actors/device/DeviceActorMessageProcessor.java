@@ -27,9 +27,7 @@ import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.SessionId;
-import org.thingsboard.server.common.data.kv.AttributeKey;
-import org.thingsboard.server.common.data.kv.AttributeKvEntry;
-import org.thingsboard.server.common.data.kv.KvEntry;
+import org.thingsboard.server.common.data.kv.*;
 import org.thingsboard.server.common.msg.cluster.ClusterEventMsg;
 import org.thingsboard.server.common.msg.cluster.ServerAddress;
 import org.thingsboard.server.common.msg.core.*;
@@ -73,7 +71,7 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
 
     private final Map<Integer, ToDeviceRpcRequestMetadata> rpcPendingMap;
 
-    private JsonObject deviceShadow ;
+    private DeviceShadow deviceShadow ;
 
     private int rpcSeq = 0;
     private String deviceName;
@@ -111,13 +109,19 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
 
     private void initDeviceShadow() {
         Device device = systemContext.getDeviceService().findDeviceById(deviceId);
+        systemContext.getAttributesService();
         String manufacture = device.getManufacture();
         String deviceType = device.getDeviceType();
         String model = device.getModel();
         if(StringUtil.checkNotNull(manufacture,deviceType,model)){
-            deviceShadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
-            deviceShadow.addProperty("deviceId",device.getId().toString());
-            //TODO send to service midware
+            JsonObject shadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
+            if(DeviceShadow.isValidDeviceShadow(shadow)){
+                deviceShadow = new DeviceShadow(shadow);
+                deviceShadow.put("deviceId",device.getId().toString());
+                //TODO send to service midware
+            }else{
+                logger.debug("wrong type of device hadow format");
+            }
         }
     }
 
@@ -277,13 +281,23 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         if(srcMsg.getToDeviceActorMsg().getPayload().getMsgType().equals(MsgType.POST_ATTRIBUTES_REQUEST)){
             Set<AttributeKvEntry> set =  ((BasicUpdateAttributesRequest)srcMsg.getToDeviceActorMsg().getPayload()).getAttributes();
             for(AttributeKvEntry kv:set){
-                deviceShadow.addProperty(kv.getKey(),kv.getValueAsString());
+                JsonObject attr = new JsonObject();
+                attr.addProperty("attributeName",kv.getKey());
+                attr.addProperty("attributeValue",kv.getValueAsString());
+                attr.addProperty("timeStamp",kv.getLastUpdateTs());
+                attr.addProperty("scope","client-side");
+                deviceShadow.updateAttribute(kv.getKey(),attr);
             }
         }else if(srcMsg.getToDeviceActorMsg().getPayload().getMsgType().equals(MsgType.POST_TELEMETRY_REQUEST)){
             Map<Long, List<KvEntry>> map =  ((BasicTelemetryUploadRequest)srcMsg.getToDeviceActorMsg().getPayload()).getData();
             for(Map.Entry<Long, List<KvEntry>> kv:map.entrySet()){
                 for(KvEntry entry:kv.getValue()){
-                    deviceShadow.addProperty(entry.getKey(),entry.getValueAsString());
+                    JsonObject tele = new JsonObject();
+                    tele.addProperty("telemetryName",entry.getKey());
+                    tele.addProperty("telemetryValue",entry.getValueAsString());
+                    tele.addProperty("timeStamp",kv.getKey());
+                    deviceShadow.updateTelemetries(entry.getKey(),tele);
+                    //                  deviceShadow.addProperty(entry.getKey(),entry.getValueAsString());
                 }
             }
         }
@@ -435,9 +449,38 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         String deviceType = msg.getDeviceType();
         String model = msg.getModel();
         if(StringUtil.checkNotNull(manufacture,deviceType,model)){
-            deviceShadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
-            deviceShadow.addProperty("deviceId",device.getId().toString());
-            //TODO send to service midware
+            JsonObject shadow = HttpUtil.getDeviceShadowDoc(manufacture,deviceType,model);
+            if(DeviceShadow.isValidDeviceShadow(shadow)){
+                deviceShadow = new DeviceShadow(shadow);
+                deviceShadow.put("deviceId",device.getId().toString());
+                //TODO send to service midware
+            }else{
+                logger.debug("wrong type of device hadow format");
+            }
+        }
+    }
+
+    public void processDeviceShadowMsg(DeviceShadowMsg msg){
+        //TODO  deiceactor中处理数据http请求
+        JsonObject payLoad = msg.getPayLoad();
+        String methodName = payLoad.get("methodName").getAsString();
+        if(methodName==null){
+            msg.setResult("methodName is null");
+        }else if(methodName.equals("get")){
+            msg.setResult(deviceShadow.getPayload().toString());
+        }else if(methodName.equals("updateAttribute")){
+            JsonObject attribute = payLoad.get("attribute").getAsJsonObject();
+            String attributeName = attribute.get("attributeName").getAsString();
+            String attributeValue = attribute.get("attributeValue").getAsString();
+            KvEntry entry = new StringDataEntry(attributeName,attributeValue);
+            AttributeKvEntry attr = new BaseAttributeKvEntry(entry,System.currentTimeMillis());
+            List<AttributeKvEntry> ls = new ArrayList<AttributeKvEntry>();
+            ls.add(attr);
+            systemContext.getAttributesService().save(msg.getDeviceId(),"SERVER_SCOPE",ls);
+            deviceShadow.updateAttribute(attribute.get("attributeName").getAsString(),attribute);
+            msg.setResult(deviceShadow.getPayload().toString());
+        }else{
+            msg.setResult("Unrecognized methodName");
         }
     }
 }
