@@ -40,7 +40,6 @@ import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static org.thingsboard.server.dao.model.ModelConstants.*;
-import static org.thingsboard.server.dao.model.ModelConstants.DEVICE_GROUP_PROPERTY;
 
 @Component
 @Slf4j
@@ -68,11 +67,10 @@ public class CassandraDeviceDao extends CassandraAbstractSearchTextDao<DeviceEnt
     }
 
     @Override
-    public List<Device> findDevicesByTenantIdAndGroupId(UUID tenantId ,UUID customerId,UUID groupId, TextPageLink pageLink) {
+    public List<Device> findDevicesByGroupId(UUID groupId, TextPageLink pageLink) {
         log.debug("Try to find devices by groupId [{}] and pageLink [{}]", groupId, pageLink);
         List<DeviceEntity> deviceEntities = findPageWithTextSearch(DEVICE_COLUMN_FAMILY_NAME,
-                Arrays.asList(eq(DEVICE_GROUP_PROPERTY, groupId),eq(DEVICE_CUSTOMER_ID_PROPERTY, customerId),
-                        eq(DEVICE_TENANT_ID_PROPERTY, tenantId)), pageLink);
+                Collections.singletonList(eq(DEVICE_GROUP_PROPERTY, groupId)), pageLink);
 
         log.trace("Found devices [{}] by groupId [{}] and pageLink [{}]", deviceEntities, groupId, pageLink);
         return DaoUtil.convertDataList(deviceEntities);
@@ -169,7 +167,7 @@ public class CassandraDeviceDao extends CassandraAbstractSearchTextDao<DeviceEnt
                 if (result != null) {
                     List<EntitySubtype> entitySubtypes = new ArrayList<>();
                     result.all().forEach((entitySubtypeEntity) ->
-                        entitySubtypes.add(entitySubtypeEntity.toEntitySubtype())
+                            entitySubtypes.add(entitySubtypeEntity.toEntitySubtype())
                     );
                     return entitySubtypes;
                 } else {

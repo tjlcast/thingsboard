@@ -25,6 +25,7 @@ import lombok.ToString;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.GroupId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.model.SearchTextEntity;
 import org.thingsboard.server.dao.model.type.JsonCodec;
@@ -54,7 +55,6 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
     @Column(name = DEVICE_TYPE_PROPERTY)
     private String type;
 
-    @PartitionKey(value = 4)
     @Column(name = DEVICE_GROUP_PROPERTY)
     private UUID groupId;
 
@@ -94,7 +94,7 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
             this.customerId = device.getCustomerId().getId();
         }
         if (device.getGroupId()!= null){
-            this.groupId = device.getGroupId();
+            this.groupId = device.getGroupId().getId();
         }
         else{
             this.groupId = device.getTenantId().getId();
@@ -221,7 +221,7 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
             device.setCustomerId(new CustomerId(customerId));
         }
         if (groupId != null) {
-            device.setGroupId(groupId);
+            device.setGroupId(new GroupId(groupId));
         }
         device.setName(name);
         device.setType(type);

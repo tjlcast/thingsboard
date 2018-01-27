@@ -55,7 +55,7 @@ public interface DeviceDao extends Dao<Device> {
      * @param pageLink the page link
      * @return the list of device objects
      */
-    List<Device> findDevicesByTenantIdAndGroupId(UUID tenantId, UUID customerId,UUID groupId, TextPageLink pageLink);
+    List<Device> findDevicesByGroupId(UUID groupId, TextPageLink pageLink);
 
     /**
      * Find devices by tenantId, type and page link.

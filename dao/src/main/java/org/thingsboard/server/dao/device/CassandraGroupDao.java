@@ -1,21 +1,5 @@
-/**
- * Copyright © 2016-2017 The Thingsboard Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.thingsboard.server.dao.device;
 
-import com.datastax.driver.core.querybuilder.Select;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.Group;
@@ -28,11 +12,13 @@ import org.thingsboard.server.dao.util.NoSqlDao;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 
+/**
+ * Created by CZX on 2017/12/11.
+ */
 @Component
 @Slf4j
 @NoSqlDao
@@ -58,5 +44,13 @@ public class CassandraGroupDao extends CassandraAbstractSearchTextDao<GroupEntit
         return DaoUtil.convertDataList(groupEntities);
     }
 
-}
+    @Override
+    public List<Group> findGroupsByCustomerId(UUID customerId, TextPageLink pageLink) {
+        log.debug("Try to find groups by customerId [{}] and pageLink [{}]",  customerId , pageLink);
+        List<GroupEntity> groupEntities = findPageWithTextSearch(ModelConstants.GROUP_BY_CUSTOMER_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME,
+                Arrays.asList(eq(ModelConstants.GROUP_CUSTOMER_ID_PROPERTY, customerId)), pageLink);
+        log.trace("Found groups [{}] by customerId [{}] and pageLink [{}]", groupEntities, customerId,  pageLink);
+        return DaoUtil.convertDataList(groupEntities);
+    }
 
+}

@@ -53,8 +53,6 @@ public class EntityIdFactory {
                 return new AssetId(uuid);
             case ALARM:
                 return new AlarmId(uuid);
-            case GROUP:
-                return new GroupId(uuid);
         }
         throw new IllegalArgumentException("EntityType " + type + " is not supported!");
     }

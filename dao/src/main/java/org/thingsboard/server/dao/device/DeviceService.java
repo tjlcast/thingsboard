@@ -40,7 +40,7 @@ public interface DeviceService {
 
     Device saveDevice(Device device);
 
-    Device assignDeviceToGroup(DeviceId deviceId, UUID groupId);
+    Device assignDeviceToGroup(DeviceId deviceId, GroupId groupId);
 
     Device assignDeviceToCustomer(DeviceId deviceId, CustomerId customerId);
 
@@ -48,7 +48,7 @@ public interface DeviceService {
 
     void deleteDevice(DeviceId deviceId);
 
-    TextPageData<Device> findDevicesByTenantIdAndGroupId(TenantId tenantId , CustomerId customerId, GroupId groupId, TextPageLink pageLink);
+    TextPageData<Device> findDevicesByGroupId(GroupId groupId, TextPageLink pageLink);
 
     TextPageData<Device> findDevicesByTenantId(TenantId tenantId, TextPageLink pageLink);
 
