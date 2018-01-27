@@ -102,10 +102,10 @@ public final class DeviceEntity implements SearchTextEntity<Device> {
         this.name = device.getName();
         this.type = device.getType();
         this.additionalInfo = device.getAdditionalInfo();
-        this.model = "device.getModel()";         //test
-        this.manufacture = "device.getManufacture()";
-        this.parentDeviceId = "device.getParentDeviceId()";
-        this.deviceType = "device.getDeviceType()";
+        this.model = device.getModel();         //test
+        this.manufacture = device.getManufacture();
+        this.parentDeviceId = device.getParentDeviceId();
+        this.deviceType = device.getDeviceType();
     }
 
     public UUID getId() {
